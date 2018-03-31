@@ -1,23 +1,47 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 
-PROJECT(Pok3rConf)
+project(Pok3rConf)
 
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
-SET(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
 
-FIND_PACKAGE(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
 qt5_wrap_ui(UI_SRC
     mainwindow.ui
 )
 
-SET(SRC
+set(SRC
     main.cpp
     mainwindow.h
     mainwindow.cpp
     ${UI_SRC}
 )
 
-ADD_EXECUTABLE(pok3rconf ${SRC})
-TARGET_LINK_LIBRARIES(pok3rconf Qt5::Widgets)
+if(WIN32)
+    add_executable(pok3rconf WIN32 ${SRC})
+else()
+    add_executable(pok3rconf ${SRC})
+endif()
+target_link_libraries(pok3rconf Qt5::Widgets)
 
+# Copy shared libraries to build dir
+add_custom_command(TARGET pok3rconf POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:Qt5::Core>
+        $<TARGET_FILE:Qt5::Gui>
+        $<TARGET_FILE:Qt5::Widgets>
+        $<TARGET_FILE_DIR:pok3rconf>
+)
+
+if(MINGW)
+    # Apparently Qt's mingw doesn't come with some static libraries
+    get_filename_component(MINGW_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
+    add_custom_command(TARGET pok3rconf POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${MINGW_DIR}/../i686-w64-mingw32/lib/libgcc_s_dw2-1.dll
+            ${MINGW_DIR}/../i686-w64-mingw32/lib/libstdc++-6.dll
+            ${MINGW_DIR}/../i686-w64-mingw32/lib/libwinpthread-1.dll
+            $<TARGET_FILE_DIR:pok3rconf>
+    )
+endif()
