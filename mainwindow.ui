@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>421</width>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="selectionWidget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QComboBox" name="keyboardSelect">
@@ -33,9 +33,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="upload">
+        <widget class="QPushButton" name="rescanButton">
          <property name="text">
-          <string>Upload Configuration</string>
+          <string>Rescan</string>
          </property>
         </widget>
        </item>
@@ -53,19 +53,38 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QWidget" name="widget_2" native="true">
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>Keyboard currently running</string>
+              <string>This keyboard is currently running:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="firwareVersion">
              <property name="text">
-              <string>ThisFirmwareVersion</string>
+              <string>FirmwareName V0.0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -91,6 +110,19 @@
            <string>Flash qmk-pok3r</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -133,6 +165,19 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="value">
+       <number>-1</number>
+      </property>
+      <property name="textVisible">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -140,7 +185,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>421</width>
      <height>21</height>
     </rect>
    </property>

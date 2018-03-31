@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Pok3rConf)
 
+add_subdirectory(pok3rtool)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
@@ -23,7 +25,7 @@ if(WIN32)
 else()
     add_executable(pok3rconf ${SRC})
 endif()
-target_link_libraries(pok3rconf Qt5::Widgets)
+target_link_libraries(pok3rconf pok3rlib Qt5::Widgets)
 
 # Copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD
