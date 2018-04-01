@@ -17,6 +17,8 @@ set(SRC
     main.cpp
     mainwindow.h
     mainwindow.cpp
+    mainworker.h
+    mainworker.cpp
     ${UI_SRC}
 )
 
@@ -25,7 +27,7 @@ if(WIN32)
 else()
     add_executable(pok3rconf ${SRC})
 endif()
-target_link_libraries(pok3rconf pok3rlib Qt5::Widgets)
+target_link_libraries(pok3rconf chaos pok3rlib Qt5::Widgets)
 
 # Copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD

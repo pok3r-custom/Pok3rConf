@@ -3,12 +3,18 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+    ui(new Ui::MainWindow){
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow(){
     delete ui;
+}
+
+void MainWindow::connectSlots(MainWorker *worker){
+    connect(ui->rescanButton, SIGNAL(clicked()), worker, SLOT(doRescan()));
+}
+
+void MainWindow::onUpdateList(QList<QString> list){
+
 }
