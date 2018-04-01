@@ -23,11 +23,12 @@ void MainWindow::connectWorker(MainWorker *worker){
 void MainWindow::on_rescanButton_clicked(){
     if(!scanning){
         scanning = true;
+        emit doRescan();
         ui->rescanButton->setEnabled(false);
         ui->keyboardSelect->clear();
         ui->keyboardSelect->setEnabled(false);
         ui->progressBar->setMaximum(0);
-        emit doRescan();
+        ui->statusBar->showMessage("Scanning...");
     }
 }
 
@@ -38,4 +39,5 @@ void MainWindow::onRescanDone(QStringList list){
     ui->keyboardSelect->setEnabled(true);
     ui->progressBar->setValue(100);
     ui->progressBar->setMaximum(100);
+    ui->statusBar->showMessage("Scan Done");
 }

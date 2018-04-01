@@ -27,27 +27,27 @@ if(WIN32)
 else()
     add_executable(pok3rconf ${SRC})
 endif()
-target_link_libraries(pok3rconf chaos pok3rlib Qt5::Widgets)
+target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets)
 
 # Copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-        "$<TARGET_FILE:chaos>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:chaos-shared>"
         "$<TARGET_FILE_DIR:pok3rconf>"
-    COMMAND ${CMAKE_COMMAND} -E copy
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:pok3rlib>"
         "$<TARGET_FILE_DIR:pok3rconf>"
 )
 
 if(WIN32)
     add_custom_command(TARGET pok3rconf POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::Core>"
             "$<TARGET_FILE_DIR:pok3rconf>"
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::Gui>"
             "$<TARGET_FILE_DIR:pok3rconf>"
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::Widgets>"
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
@@ -57,13 +57,13 @@ if(MINGW)
     # Apparently Qt's mingw doesn't come with some static libraries
     get_filename_component(MINGW_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
     add_custom_command(TARGET pok3rconf POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${MINGW_DIR}/../i686-w64-mingw32/lib/libgcc_s_dw2-1.dll
             "$<TARGET_FILE_DIR:pok3rconf>"
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${MINGW_DIR}/../i686-w64-mingw32/lib/libstdc++-6.dll
             "$<TARGET_FILE_DIR:pok3rconf>"
-        COMMAND ${CMAKE_COMMAND} -E copy
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${MINGW_DIR}/../i686-w64-mingw32/lib/libwinpthread-1.dll
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
