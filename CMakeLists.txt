@@ -32,15 +32,26 @@ target_link_libraries(pok3rconf chaos pok3rlib Qt5::Widgets)
 # Copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-        "$<TARGET_FILE:Qt5::Core>"
+        "$<TARGET_FILE:chaos>"
         "$<TARGET_FILE_DIR:pok3rconf>"
     COMMAND ${CMAKE_COMMAND} -E copy
-        "$<TARGET_FILE:Qt5::Gui>"
-        "$<TARGET_FILE_DIR:pok3rconf>"
-    COMMAND ${CMAKE_COMMAND} -E copy
-        "$<TARGET_FILE:Qt5::Widgets>"
+        "$<TARGET_FILE:pok3rlib>"
         "$<TARGET_FILE_DIR:pok3rconf>"
 )
+
+if(WIN32)
+    add_custom_command(TARGET pok3rconf POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:Qt5::Core>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:Qt5::Gui>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:Qt5::Widgets>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+    )
+endif()
 
 if(MINGW)
     # Apparently Qt's mingw doesn't come with some static libraries

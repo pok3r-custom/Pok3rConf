@@ -20,16 +20,9 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QComboBox" name="keyboardSelect">
-         <item>
-          <property name="text">
-           <string>Keyboard 1</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Keyboard 2</string>
-          </property>
-         </item>
+         <property name="currentText">
+          <string/>
+         </property>
         </widget>
        </item>
        <item>

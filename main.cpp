@@ -21,23 +21,33 @@ int main(int argc, char *argv[]){
     ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
     ZLog::logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
 
+    LOG("Starting application");
+
     QApplication app(argc, argv);
 
     MainWindow window;
     MainWorker worker;
     QThread thread;
 
-    // connect events
-    window.connectSlots(&worker);
+    // connect worker slots
+    qRegisterMetaType<ZString>("ZString");
+    window.connectWorker(&worker);
+    // start scan when thread starts
+    QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));
 
     // start thread
     worker.moveToThread(&thread);
     thread.start();
 
     window.show();
-
     int ret = app.exec();
+
+    // stop thread
     thread.quit();
+    if(!thread.wait(1000)){
+        ELOG("Terminating thread");
+        thread.terminate();
+    }
 
     return ret;
 }

@@ -15,13 +15,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void connectSlots(MainWorker *worker);
+    void connectWorker(MainWorker *worker);
+
+signals:
+    void doRescan();
 
 public slots:
-    void onUpdateList(QList<QString> list);
+    void on_rescanButton_clicked();
+    void onRescanDone(QStringList list);
 
 private:
     Ui::MainWindow *ui;
+    bool scanning;
 };
 
 #endif // MAINWINDOW_H

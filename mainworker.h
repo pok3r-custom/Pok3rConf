@@ -9,10 +9,10 @@ public:
     explicit MainWorker(QObject *parent = nullptr);
 
 signals:
-    void updateList(QList<QString> list);
+    void rescanDone(QStringList list);
 
 public slots:
-    void doRescan();
+    void onDoRescan();
 };
 
 #endif // MAINWORKER_H
