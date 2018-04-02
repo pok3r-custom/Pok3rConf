@@ -7,22 +7,21 @@
 
 #include "zlog.h"
 #include "zmap.h"
-#include <windows.h>
 
 // Enums
 // ////////////////////////////////
 
 enum Device {
     DEV_NONE = 0,
-    POK3R,          //!< Vortex POK3R
-    POK3R_RGB,      //!< Vortex POK3R RGB
-    VORTEX_CORE,    //!< Vortex Core
-    VORTEX_RACE3,   //!< Vortex Race 3
-    VORTEX_TESTER,  //!< Vortex 22-Key Switch Tester
-    VORTEX_VIBE,    //!< Vortex ViBE
-    KBP_V60,        //!< KBParadise v60 Mini
-    KBP_V80,        //!< KBParadise v80
-    TEX_YODA_II,    //!< Tex Yoda II
+    DEV_POK3R,          //!< Vortex POK3R
+    DEV_POK3R_RGB,      //!< Vortex POK3R RGB
+    DEV_VORTEX_CORE,    //!< Vortex Core
+    DEV_VORTEX_RACE3,   //!< Vortex Race 3
+    DEV_VORTEX_TESTER,  //!< Vortex 22-Key Switch Tester
+    DEV_VORTEX_VIBE,    //!< Vortex ViBE
+    DEV_KBP_V60,        //!< KBParadise v60 Mini
+    DEV_KBP_V80,        //!< KBParadise v80
+    DEV_TEX_YODA_II,    //!< Tex Yoda II
 };
 
 enum DevType {
@@ -52,15 +51,15 @@ struct ListDevice {
 // ////////////////////////////////
 
 const ZMap<Device, VortexDevice> devices = {
-    { POK3R,            { "POK3R",          HOLTEK_VID, POK3R_PID,          POK3R_BOOT_PID,         PROTO_POK3R } },
-    { POK3R_RGB,        { "POK3R RGB",      HOLTEK_VID, POK3R_RGB_PID,      POK3R_RGB_BOOT_PID,     PROTO_CYKB } },
-    { VORTEX_CORE,      { "Vortex Core",    HOLTEK_VID, VORTEX_CORE_PID,    VORTEX_CORE_BOOT_PID,   PROTO_CYKB } },
-    { VORTEX_TESTER,    { "Vortex Tester",  HOLTEK_VID, VORTEX_TESTER_PID,  VORTEX_TESTER_BOOT_PID, PROTO_CYKB } },
-    { VORTEX_RACE3,     { "Vortex Race 3",  HOLTEK_VID, VORTEX_RACE3_PID,   VORTEX_RACE3_BOOT_PID,  PROTO_CYKB } },
-    { VORTEX_VIBE,      { "Vortex ViBE",    HOLTEK_VID, VORTEX_VIBE_PID,    VORTEX_VIBE_BOOT_PID,   PROTO_CYKB } },
-    { KBP_V60,          { "KBP V60",        HOLTEK_VID, KBP_V60_PID,        KBP_V60_BOOT_PID,       PROTO_POK3R } },
-    { KBP_V80,          { "KBP V80",        HOLTEK_VID, KBP_V80_PID,        KBP_V80_BOOT_PID,       PROTO_POK3R } },
-    { TEX_YODA_II,      { "Tex Yoda II",    HOLTEK_VID, TEX_YODA_II_PID,    TEX_YODA_II_BOOT_PID,   PROTO_CYKB } },
+    { DEV_POK3R,            { "POK3R",          HOLTEK_VID, POK3R_PID,          POK3R_BOOT_PID,         PROTO_POK3R } },
+    { DEV_POK3R_RGB,        { "POK3R RGB",      HOLTEK_VID, POK3R_RGB_PID,      POK3R_RGB_BOOT_PID,     PROTO_CYKB } },
+    { DEV_VORTEX_CORE,      { "Vortex Core",    HOLTEK_VID, VORTEX_CORE_PID,    VORTEX_CORE_BOOT_PID,   PROTO_CYKB } },
+    { DEV_VORTEX_TESTER,    { "Vortex Tester",  HOLTEK_VID, VORTEX_TESTER_PID,  VORTEX_TESTER_BOOT_PID, PROTO_CYKB } },
+    { DEV_VORTEX_RACE3,     { "Vortex Race 3",  HOLTEK_VID, VORTEX_RACE3_PID,   VORTEX_RACE3_BOOT_PID,  PROTO_CYKB } },
+    { DEV_VORTEX_VIBE,      { "Vortex ViBE",    HOLTEK_VID, VORTEX_VIBE_PID,    VORTEX_VIBE_BOOT_PID,   PROTO_CYKB } },
+    { DEV_KBP_V60,          { "KBP V60",        HOLTEK_VID, KBP_V60_PID,        KBP_V60_BOOT_PID,       PROTO_POK3R } },
+    { DEV_KBP_V80,          { "KBP V80",        HOLTEK_VID, KBP_V80_PID,        KBP_V80_BOOT_PID,       PROTO_POK3R } },
+    { DEV_TEX_YODA_II,      { "Tex Yoda II",    HOLTEK_VID, TEX_YODA_II_PID,    TEX_YODA_II_BOOT_PID,   PROTO_CYKB } },
 };
 
 // Private Functions
