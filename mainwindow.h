@@ -22,7 +22,7 @@ signals:
 
 public slots:
     void on_rescanButton_clicked();
-    void onRescanDone(QStringList list);
+    void onRescanDone(ZList<KeyboardDevice> list);
 
 private:
     Ui::MainWindow *ui;

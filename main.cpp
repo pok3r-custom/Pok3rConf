@@ -31,6 +31,7 @@ int main(int argc, char *argv[]){
 
     // connect worker slots
     qRegisterMetaType<ZString>("ZString");
+    qRegisterMetaType<ZList<KeyboardDevice>>("ZList<KeyboardDevice>");
     window.connectWorker(&worker);
     // start scan when thread starts
     QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));

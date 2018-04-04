@@ -3,6 +3,10 @@
 
 #include "zlog.h"
 
+static inline QString toQStr(ZString str){
+    return QString::fromUtf8(str.raw(), str.size());
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -17,7 +21,7 @@ MainWindow::~MainWindow(){
 
 void MainWindow::connectWorker(MainWorker *worker){
     connect(this, SIGNAL(doRescan()), worker, SLOT(onDoRescan()));
-    connect(worker, SIGNAL(rescanDone(QStringList)), this, SLOT(onRescanDone(QStringList)));
+    connect(worker, SIGNAL(rescanDone(ZList<KeyboardDevice>)), this, SLOT(onRescanDone(ZList<KeyboardDevice>)));
 }
 
 void MainWindow::on_rescanButton_clicked(){
@@ -25,19 +29,28 @@ void MainWindow::on_rescanButton_clicked(){
         scanning = true;
         emit doRescan();
         ui->rescanButton->setEnabled(false);
-        ui->keyboardSelect->clear();
-        ui->keyboardSelect->setEnabled(false);
         ui->progressBar->setMaximum(0);
         ui->statusBar->showMessage("Scanning...");
+        ui->keyboardSelect->clear();
+        ui->keyboardSelect->setEnabled(false);
+        ui->flash->setEnabled(false);
     }
 }
 
-void MainWindow::onRescanDone(QStringList list){
+void MainWindow::onRescanDone(ZList<KeyboardDevice> list){
     scanning = false;
     ui->rescanButton->setEnabled(true);
-    ui->keyboardSelect->addItems(list);
-    ui->keyboardSelect->setEnabled(true);
     ui->progressBar->setValue(100);
     ui->progressBar->setMaximum(100);
     ui->statusBar->showMessage("Scan Done");
+    if(list.size()){
+        QStringList slist;
+        for(auto it = list.begin(); it.more(); ++it){
+            slist.push_back(toQStr(it.get().name));
+        }
+        ui->keyboardSelect->addItems(slist);
+        ui->keyboardSelect->setEnabled(true);
+    } else {
+
+    }
 }
