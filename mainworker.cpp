@@ -9,7 +9,7 @@
 #include "zlog.h"
 #include "zmap.h"
 
-static inline QString toQStr(ZString str){
+inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
@@ -23,6 +23,13 @@ void MainWorker::onDoRescan(){
 
     KBScan scanner;
     scanner.scan();
+    auto devs = scanner.open();
+    for (auto it = devs.begin(); it.more(); ++it){
+        auto dev = it.get();
+        ZString version = dev.iface->getVersion();
+        LOG(dev.info.name << ": " << version);
+        list.push({ dev.info.name, version, FLAG_NONE });
+    }
 
     LOG("<< Rescan Done");
     emit rescanDone(list);

@@ -3,7 +3,7 @@
 
 #include "zlog.h"
 
-static inline QString toQStr(ZString str){
+inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
