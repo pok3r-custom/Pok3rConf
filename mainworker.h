@@ -25,7 +25,7 @@ public:
     explicit MainWorker(QObject *parent = nullptr);
 
 signals:
-    void rescanDone(ZList<KeyboardDevice> list);
+    void rescanDone(ZArray<KeyboardDevice> list);
 
 public slots:
     void onDoRescan();

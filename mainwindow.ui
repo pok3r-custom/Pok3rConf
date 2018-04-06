@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
-    <height>325</height>
+    <width>464</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,66 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="noTab">
+       <attribute name="title">
+        <string>No Keyboard</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <spacer name="verticalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;No Keyboard Detected!&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Make sure your keyboard is connected, and your user has the correct permissions to access the device.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/pok3r-custom/Pok3rConf&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/pok3r-custom/Pok3rConf&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="firmwareTab">
        <attribute name="title">
         <string>Firmware</string>
        </attribute>
@@ -52,8 +111,8 @@
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>20</width>
-            <height>40</height>
+            <width>386</width>
+            <height>9</height>
            </size>
           </property>
          </spacer>
@@ -62,9 +121,9 @@
          <widget class="QWidget" name="widget_2" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="keyboardName">
              <property name="text">
-              <string>This keyboard is currently running:</string>
+              <string>keyboard name</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -72,9 +131,19 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="firwareVersion">
+            <widget class="QLabel" name="firmwareVersion">
              <property name="text">
-              <string>FirmwareName V0.0</string>
+              <string>firmware version</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="supported">
+             <property name="text">
+              <string>keyboard supported</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -98,7 +167,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="flash">
+         <widget class="QPushButton" name="flashButton">
           <property name="text">
            <string>Flash qmk-pok3r</string>
           </property>
@@ -119,7 +188,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="kll">
+      <widget class="QWidget" name="kllTab">
        <attribute name="title">
         <string>KLL</string>
        </attribute>
@@ -129,7 +198,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="commands">
+      <widget class="QWidget" name="commandsTab">
        <attribute name="title">
         <string>Commands</string>
        </attribute>
@@ -143,6 +212,43 @@
         </item>
         <item>
          <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="aboutTab">
+       <attribute name="title">
+        <string>About</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QLabel" name="version">
+          <property name="text">
+           <string>Version: Unknown</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/pok3r-custom/Pok3rConf&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/pok3r-custom/Pok3rConf&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -178,8 +284,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>421</width>
-     <height>21</height>
+     <width>464</width>
+     <height>30</height>
     </rect>
    </property>
   </widget>

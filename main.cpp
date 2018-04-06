@@ -25,13 +25,17 @@ int main(int argc, char *argv[]){
 
     QApplication app(argc, argv);
 
+    QApplication::setOrganizationName("zennix");
+    QApplication::setApplicationName("Pok3rConf");
+    QApplication::setApplicationVersion("0.1");
+
     MainWindow window;
     MainWorker worker;
     QThread thread;
 
     // connect worker slots
     qRegisterMetaType<ZString>("ZString");
-    qRegisterMetaType<ZList<KeyboardDevice>>("ZList<KeyboardDevice>");
+    qRegisterMetaType<ZArray<KeyboardDevice>>("ZArray<KeyboardDevice>");
     window.connectWorker(&worker);
     // start scan when thread starts
     QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));

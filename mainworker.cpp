@@ -18,7 +18,7 @@ MainWorker::MainWorker(QObject *parent) : QObject(parent){
 }
 
 void MainWorker::onDoRescan(){
-    ZList<KeyboardDevice> list;
+    ZArray<KeyboardDevice> list;
     LOG(">> Start Rescan");
 
     KBScan scanner;

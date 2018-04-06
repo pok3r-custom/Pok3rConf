@@ -22,11 +22,13 @@ signals:
 
 public slots:
     void on_rescanButton_clicked();
-    void onRescanDone(ZList<KeyboardDevice> list);
+    void on_keyboardSelect_currentIndexChanged(int index);
+    void onRescanDone(ZArray<KeyboardDevice> list);
 
 private:
     Ui::MainWindow *ui;
     bool scanning;
+    ZArray<KeyboardDevice> klist;
 };
 
 #endif // MAINWINDOW_H
