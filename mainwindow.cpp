@@ -1,3 +1,5 @@
+#include <QCoreApplication>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -9,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     scanning(false)
 {
     ui->setupUi(this);
+
+    ui->version->setText("Version: " + QCoreApplication::applicationVersion());
 }
 
 MainWindow::~MainWindow(){
@@ -39,5 +43,9 @@ void MainWindow::onRescanDone(QStringList list){
     ui->keyboardSelect->setEnabled(true);
     ui->progressBar->setValue(100);
     ui->progressBar->setMaximum(100);
-    ui->statusBar->showMessage("Scan Done");
+    if (list.isEmpty()) {
+        ui->statusBar->showMessage("No keyboards detected");
+    } else {
+        ui->statusBar->showMessage("Scan done");
+    }
 }

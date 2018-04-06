@@ -25,6 +25,10 @@ int main(int argc, char *argv[]){
 
     QApplication app(argc, argv);
 
+    QApplication::setOrganizationName("zennix");
+    QApplication::setApplicationName("Pok3rConf");
+    QApplication::setApplicationVersion("0.1");
+
     MainWindow window;
     MainWorker worker;
     QThread thread;
