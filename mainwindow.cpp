@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow(){

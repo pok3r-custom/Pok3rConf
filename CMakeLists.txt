@@ -35,6 +35,9 @@ add_custom_command(TARGET pok3rconf POST_BUILD
         "$<TARGET_FILE:chaos-shared>"
         "$<TARGET_FILE_DIR:pok3rconf>"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:rawhid>"
+        "$<TARGET_FILE_DIR:pok3rconf>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:pok3rlib>"
         "$<TARGET_FILE_DIR:pok3rconf>"
 )
