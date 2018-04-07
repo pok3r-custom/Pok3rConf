@@ -34,8 +34,10 @@ int main(int argc, char *argv[]){
     QThread thread;
 
     // connect worker slots
+    qRegisterMetaType<zu64>("zu64");
     qRegisterMetaType<ZString>("ZString");
     qRegisterMetaType<ZArray<KeyboardDevice>>("ZArray<KeyboardDevice>");
+    qRegisterMetaType<KeyboardCommand>("KeyboardCommand");
     window.connectWorker(&worker);
     // start scan when thread starts
     QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));

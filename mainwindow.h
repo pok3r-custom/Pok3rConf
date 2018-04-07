@@ -17,13 +17,25 @@ public:
 
     void connectWorker(MainWorker *worker);
 
+private:
+    void startCommand(KeyboardCommand cmd);
+
 signals:
     void doRescan();
+    void kbCommand(zu64 key, KeyboardCommand cmd);
 
 public slots:
+    void onRescanDone(ZArray<KeyboardDevice> list);
+    void onCommandDone(bool ret);
+
+private slots:
     void on_rescanButton_clicked();
     void on_keyboardSelect_currentIndexChanged(int index);
-    void onRescanDone(ZArray<KeyboardDevice> list);
+    void on_browseButton_clicked();
+    void on_uploadButton_clicked();
+    void on_rebootButton_clicked();
+
+    void on_bootButton_clicked();
 
 private:
     Ui::MainWindow *ui;
