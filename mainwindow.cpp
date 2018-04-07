@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
     ui->tabWidget->setCurrentIndex(0);
+    ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 }
 
 MainWindow::~MainWindow(){
@@ -133,4 +134,9 @@ void MainWindow::on_rebootButton_clicked(){
 
 void MainWindow::on_bootButton_clicked(){
     startCommand(CMD_BOOTLOADER);
+}
+
+void MainWindow::on_fileEdit_textChanged(const QString &arg1)
+{
+    settings.setValue(CUSTOM_FIRMWARE_LOCATION, arg1);
 }

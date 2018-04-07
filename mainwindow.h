@@ -4,6 +4,7 @@
 #include "mainworker.h"
 
 #include <QMainWindow>
+#include <QSettings>
 
 namespace Ui {
     class MainWindow;
@@ -37,10 +38,14 @@ private slots:
 
     void on_bootButton_clicked();
 
+    void on_fileEdit_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     bool scanning;
     ZArray<KeyboardDevice> klist;
+    QSettings settings;
+    const QString CUSTOM_FIRMWARE_LOCATION = "customFirmwareLocation";
 };
 
 #endif // MAINWINDOW_H
