@@ -41,6 +41,7 @@ private:
     Ui::MainWindow *ui;
     bool scanning;
     ZArray<KeyboardDevice> klist;
+    KeyboardCommand currcmd;
 };
 
 #endif // MAINWINDOW_H

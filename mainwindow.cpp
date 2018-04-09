@@ -14,7 +14,8 @@ inline QString toQStr(ZString str){
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    scanning(false)
+    scanning(false),
+    currcmd(CMD_NONE)
 {
     ui->setupUi(this);
 
@@ -35,7 +36,8 @@ void MainWindow::connectWorker(MainWorker *worker){
 
 void MainWindow::startCommand(KeyboardCommand cmd){
     int index = ui->keyboardSelect->currentIndex();
-    if(index >= 0){
+    if(index >= 0 && currcmd == CMD_NONE){
+        currcmd = cmd;
         ui->progressBar->setMaximum(0);
         ui->rebootButton->setEnabled(false);
         ui->bootButton->setEnabled(false);
@@ -79,6 +81,12 @@ void MainWindow::onCommandDone(bool ret){
     }  else {
         ui->statusBar->showMessage("Command Error");
     }
+
+//    KeyboardCommand cmd = currcmd;
+    currcmd = CMD_NONE;
+//    if(cmd == CMD_REBOOT || cmd == CMD_BOOTLOADER){
+//        on_rescanButton_clicked();
+//    }
 }
 
 void MainWindow::on_rescanButton_clicked(){

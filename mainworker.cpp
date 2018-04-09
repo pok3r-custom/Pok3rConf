@@ -19,13 +19,16 @@ MainWorker::MainWorker(QObject *parent) : QObject(parent){
 }
 
 void MainWorker::onDoRescan(){
-    ZArray<KeyboardDevice> list;
     LOG(">> Start Rescan");
 
+    kdevs.clear();
+
     KBScan scanner;
+    ZRandom random;
+    ZArray<KeyboardDevice> list;
+
     scanner.scan();
     auto devs = scanner.open();
-    ZRandom random;
     for(auto it = devs.begin(); it.more(); ++it){
         auto dev = it.get();
         ZString version = dev.iface->getVersion();
@@ -49,10 +52,10 @@ void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd){
 
     switch(cmd){
         case CMD_REBOOT:
-            ret = dev.iface->enterFirmware();
+            ret = dev.iface->rebootFirmware(true);
             break;
         case CMD_BOOTLOADER:
-            ret = dev.iface->enterBootloader();
+            ret = dev.iface->rebootBootloader(true);
             break;
         default:
             break;
