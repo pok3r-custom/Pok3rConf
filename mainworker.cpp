@@ -3,7 +3,7 @@
 #include "pok3rtool/proto_pok3r.h"
 #include "pok3rtool/proto_cykb.h"
 #include "pok3rtool/rawhid/hiddevice.h"
-#include "pok3rtool/updateinterface.h"
+#include "pok3rtool/kbproto.h"
 #include "pok3rtool/kbscan.h"
 
 #include "zlog.h"
