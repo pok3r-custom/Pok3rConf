@@ -33,7 +33,7 @@ struct KeyboardDevice {
 class MainWorker : public QObject {
     Q_OBJECT
 public:
-    explicit MainWorker(QObject *parent = nullptr);
+    explicit MainWorker(bool fake, QObject *parent = nullptr);
 
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
@@ -45,6 +45,7 @@ public slots:
 
 private:
     ZMap<zu64, KBDevice> kdevs;
+    bool fake;
 };
 
 #endif // MAINWORKER_H

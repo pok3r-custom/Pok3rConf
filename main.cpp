@@ -4,9 +4,18 @@
 #include <QApplication>
 #include <QThreadPool>
 
+#include "zoptions.h"
 #include "zlog.h"
 
 using namespace LibChaos;
+
+#define OPT_VERBOSE "verbose"
+#define OPT_FAKE    "fake"
+
+const ZArray<ZOptions::OptDef> optdef = {
+    { OPT_VERBOSE,  'v', ZOptions::NONE },
+    { OPT_FAKE,     0, ZOptions::NONE },    // Add a fake device to device list
+};
 
 #define TERM_RESET  "\x1b[m"
 #define TERM_RED    "\x1b[31m"
@@ -21,7 +30,11 @@ int main(int argc, char *argv[]){
     ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
     ZLog::logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
 
-    LOG("Starting application");
+    ZOptions options(optdef);
+    if(!options.parse(argc, argv))
+        return -2;
+
+    LOG("Starting pok3rconf");
 
     QApplication app(argc, argv);
 
@@ -30,7 +43,7 @@ int main(int argc, char *argv[]){
     QApplication::setApplicationVersion("0.1");
 
     MainWindow window;
-    MainWorker worker;
+    MainWorker worker(options.getOpts().contains(OPT_FAKE));
     QThread thread;
 
     // connect worker slots
