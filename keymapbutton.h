@@ -9,6 +9,9 @@ public:
     explicit KeymapButton(int id, int units, QWidget *parent = 0);
 
     QSize sizeHint() const override;
+    int heightForWidth(int width) const override;
+
+    void forSize(int width, int height);
 
 private:
     int units;

@@ -19,7 +19,6 @@ public:
     void connectWorker(MainWorker *worker);
 
 private:
-    QWidget *makeButton(int id, int size);
     void startCommand(KeyboardCommand cmd);
 
 signals:
@@ -29,6 +28,10 @@ signals:
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
     void onCommandDone(bool ret);
+
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent *event);
 
 private slots:
     void on_rescanButton_clicked();

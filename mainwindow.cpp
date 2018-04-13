@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QPushButton>
 #include <QGridLayout>
+#include <QResizeEvent>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -14,7 +15,7 @@ inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
-const ZArray<ZArray<int>> currentLayout = {
+const ZArray<ZArray<int>> layoutAnsi60 = {
     { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, },
     { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, },
     { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, },
@@ -34,21 +35,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
+    auto keyboardLayout = layoutAnsi60;
     QGridLayout *kLayout = (QGridLayout *)ui->keymap->layout();
 
-//    kLayout->addWidget(makeButton(0, 1), 0, 0, 1, 1);
-//    kLayout->addWidget(makeButton(0, 2), 1, 0, 1, 2);
-
-    int k = 0;
-    for(int i = 0; i < currentLayout.size(); ++i){
+    int k = 1;
+    for(int i = 0; i < keyboardLayout.size(); ++i){
         int crow = 0;
-        for(int j = 0; j < currentLayout[i].size(); ++j, ++k){
-            int u = currentLayout[i][j];
-            kLayout->addWidget(makeButton(k, u), i, crow, 1, u);
+        for(int j = 0; j < keyboardLayout[i].size(); ++j, ++k){
+            int u = keyboardLayout[i][j];
+            kLayout->addWidget(new KeymapButton(k, u, ui->keymap), i, crow, 1, u);
             crow += u;
         }
         kLayout->addItem(new QSpacerItem(1, 1), i, crow, 1, 1);
-//        LOG("row sum " << crow);
+//        kLayout->setRowStretch(i, 1);
     }
 }
 
@@ -61,15 +60,6 @@ void MainWindow::connectWorker(MainWorker *worker){
     connect(worker, SIGNAL(rescanDone(ZArray<KeyboardDevice>)), this, SLOT(onRescanDone(ZArray<KeyboardDevice>)));
     connect(this, SIGNAL(kbCommand(zu64,KeyboardCommand)), worker, SLOT(onKbCommand(zu64,KeyboardCommand)));
     connect(worker, SIGNAL(commandDone(bool)), this, SLOT(onCommandDone(bool)));
-}
-
-QWidget *MainWindow::makeButton(int id, int size){
-    KeymapButton *button = new KeymapButton(id, size, ui->keymap);
-//    QPushButton *button = new QPushButton(ui->keymapTab);
-    button->setText(toQStr(id));
-    button->setCheckable(true);
-    button->setFocusPolicy(Qt::NoFocus);
-    return button;
 }
 
 void MainWindow::startCommand(KeyboardCommand cmd){
@@ -124,7 +114,19 @@ void MainWindow::onCommandDone(bool ret){
     currcmd = CMD_NONE;
 //    if(cmd == CMD_REBOOT || cmd == CMD_BOOTLOADER){
 //        on_rescanButton_clicked();
-//    }
+    //    }
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event){
+    auto list = ui->keymap->findChildren<KeymapButton *>();
+//    int width = event->size().width();
+//    int height = event->size().height();
+    int width = ui->keymapContainer->size().width();
+    int height = ui->keymapContainer->size().height();
+//    LOG("resize " << width << ", " << height);
+    foreach(KeymapButton *w, list){
+        w->forSize(width, height);
+    }
 }
 
 void MainWindow::on_rescanButton_clicked(){
