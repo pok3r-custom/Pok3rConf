@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>347</height>
+    <width>550</width>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="noTab">
        <attribute name="title">
@@ -197,6 +197,37 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="keymapTab">
+       <attribute name="title">
+        <string>Keymap</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QWidget" name="keymap" native="true">
+          <layout class="QGridLayout" name="gridLayout_4" rowstretch="0" columnstretch="0">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetDefaultConstraint</enum>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -360,7 +391,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>463</width>
+     <width>550</width>
      <height>30</height>
     </rect>
    </property>

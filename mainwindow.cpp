@@ -1,15 +1,26 @@
 #include <QCoreApplication>
 #include <QFileDialog>
 #include <QDir>
+#include <QPushButton>
+#include <QGridLayout>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "keymapbutton.h"
 
 #include "zlog.h"
 
 inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
+
+const ZArray<ZArray<int>> currentLayout = {
+    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, },
+    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, },
+    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, },
+    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, },
+    { 5, 5, 5, 25, 5, 5, 5, 5, },
+};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,6 +33,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
+
+    QGridLayout *kLayout = (QGridLayout *)ui->keymap->layout();
+
+//    kLayout->addWidget(makeButton(0, 1), 0, 0, 1, 1);
+//    kLayout->addWidget(makeButton(0, 2), 1, 0, 1, 2);
+
+    int k = 0;
+    for(int i = 0; i < currentLayout.size(); ++i){
+        int crow = 0;
+        for(int j = 0; j < currentLayout[i].size(); ++j, ++k){
+            int u = currentLayout[i][j];
+            kLayout->addWidget(makeButton(k, u), i, crow, 1, u);
+            crow += u;
+        }
+        kLayout->addItem(new QSpacerItem(1, 1), i, crow, 1, 1);
+//        LOG("row sum " << crow);
+    }
 }
 
 MainWindow::~MainWindow(){
@@ -33,6 +61,15 @@ void MainWindow::connectWorker(MainWorker *worker){
     connect(worker, SIGNAL(rescanDone(ZArray<KeyboardDevice>)), this, SLOT(onRescanDone(ZArray<KeyboardDevice>)));
     connect(this, SIGNAL(kbCommand(zu64,KeyboardCommand)), worker, SLOT(onKbCommand(zu64,KeyboardCommand)));
     connect(worker, SIGNAL(commandDone(bool)), this, SLOT(onCommandDone(bool)));
+}
+
+QWidget *MainWindow::makeButton(int id, int size){
+    KeymapButton *button = new KeymapButton(id, size, ui->keymap);
+//    QPushButton *button = new QPushButton(ui->keymapTab);
+    button->setText(toQStr(id));
+    button->setCheckable(true);
+    button->setFocusPolicy(Qt::NoFocus);
+    return button;
 }
 
 void MainWindow::startCommand(KeyboardCommand cmd){

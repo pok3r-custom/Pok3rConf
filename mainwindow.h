@@ -19,6 +19,7 @@ public:
     void connectWorker(MainWorker *worker);
 
 private:
+    QWidget *makeButton(int id, int size);
     void startCommand(KeyboardCommand cmd);
 
 signals:
