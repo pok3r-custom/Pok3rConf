@@ -15,12 +15,24 @@ inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
+#define SP      0x80
+#define SP_MSK  0x7F
+
 const ZArray<ZArray<int>> layoutAnsi60 = {
-    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, },
-    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, },
-    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, },
-    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, },
-    { 5, 5, 5, 25, 5, 5, 5, 5, },
+    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8 },
+    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6 },
+    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9 },
+    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11 },
+    { 5, 5, 5, 25, 5, 5, 5, 5 }
+};
+
+const ZArray<ZArray<int>> layoutAnsi80 = {
+    { 4, SP|4, 4, 4, 4, 4, SP|2, 4, 4, 4, 4, SP|2, 4, 4, 4, 4, SP|1, 4, 4, 4 },
+    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, SP|1, 4, 4, 4 },
+    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, SP|1, 4, 4, 4 },
+    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, SP|13 },
+    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, SP|5, 4, SP|4 },
+    { 5, 5, 5, 25, 5, 5, 5, 5, SP|1, 4, 4, 4 }
 };
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -35,19 +47,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
-    auto keyboardLayout = layoutAnsi60;
+    auto keyboardLayout = layoutAnsi80;
     QGridLayout *kLayout = (QGridLayout *)ui->keymap->layout();
 
+    int mcol = 0;
     int k = 1;
     for(int i = 0; i < keyboardLayout.size(); ++i){
-        int crow = 0;
-        for(int j = 0; j < keyboardLayout[i].size(); ++j, ++k){
-            int u = keyboardLayout[i][j];
-            kLayout->addWidget(new KeymapButton(k, u, ui->keymap), i, crow, 1, u);
-            crow += u;
+        int ccol = 0;
+        for(int j = 0; j < keyboardLayout[i].size(); ++j){
+            int d = keyboardLayout[i][j];
+            int u = d & SP_MSK;
+            if(d & SP){
+                kLayout->addItem(new QSpacerItem(1, 1), i, ccol, 1, u);
+            } else {
+                kLayout->addWidget(new KeymapButton(k, u, ui->keymap), i, ccol, 1, u);
+                ++k;
+            }
+            ccol += u;
+            mcol = qMax(mcol, ccol);
         }
-        kLayout->addItem(new QSpacerItem(1, 1), i, crow, 1, 1);
-//        kLayout->setRowStretch(i, 1);
     }
 }
 

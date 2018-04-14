@@ -10,6 +10,7 @@ public:
 
     QSize sizeHint() const override;
     int heightForWidth(int width) const override;
+    //int widthForHeight(int height) const override;
 
     void forSize(int width, int height);
 

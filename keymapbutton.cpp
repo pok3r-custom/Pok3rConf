@@ -11,9 +11,10 @@ KeymapButton::KeymapButton(int id, int u, QWidget *parent) :
         QToolButton(parent), units(u){
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 //    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-//    QSizePolicy p = sizePolicy();
+    QSizePolicy p = sizePolicy();
 //    p.setHeightForWidth(true);
-//    setSizePolicy(p);
+//    p.setWidthForHeight(true);
+    setSizePolicy(p);
     setText(toQStr(id));
     setCheckable(true);
     setFocusPolicy(Qt::NoFocus);

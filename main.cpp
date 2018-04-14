@@ -22,9 +22,6 @@ const ZArray<ZOptions::OptDef> optdef = {
 #define TERM_PURPLE "\x1b[35m"
 
 int main(int argc, char *argv[]){
-    ZLog::logLevelStdOut(ZLog::INFO, "[%clock%] N %log%");
-    //ZLog::logLevelStdOut(ZLog::DEBUG, TERM_PURPLE "[%clock%] D %log%" TERM_RESET);
-    ZLog::logLevelStdErr(ZLog::ERRORS, TERM_RED "[%clock%] E %log%" TERM_RESET);
     ZPath lgf = ZPath("logs") + ZLog::genLogFileName("pok3rconf_");
     ZLog::logLevelFile(ZLog::INFO, lgf, "[%time%] N %log%");
     ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
@@ -33,6 +30,12 @@ int main(int argc, char *argv[]){
     ZOptions options(optdef);
     if(!options.parse(argc, argv))
         return -2;
+
+    ZLog::logLevelStdOut(ZLog::INFO, "[%clock%] N %log%");
+    ZLog::logLevelStdErr(ZLog::ERRORS, TERM_RED "[%clock%] E %log%" TERM_RESET);
+    if(options.getOpts().contains(OPT_VERBOSE)){
+        ZLog::logLevelStdOut(ZLog::DEBUG, TERM_PURPLE "[%clock%] D %log%" TERM_RESET);
+    }
 
     LOG("Starting pok3rconf");
 
