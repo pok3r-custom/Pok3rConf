@@ -11,6 +11,7 @@ find_package(Qt5 COMPONENTS Core Quick Qml QuickWidgets Widgets REQUIRED)
 
 qt5_wrap_ui(UI_SRC
     mainwindow.ui
+    keycustomize.ui
 )
 
 qt5_add_resources(RC_SRC
@@ -27,6 +28,8 @@ set(SRC
     keymapbutton.cpp
     keymap.h
     keymap.cpp
+    keycustomize.h
+    keycustomize.cpp
     ${UI_SRC}
     ${RC_SRC}
 )

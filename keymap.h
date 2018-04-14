@@ -9,7 +9,9 @@ class KeyMap : public QWidget
     Q_OBJECT
 public:
     explicit KeyMap(QWidget *parent = nullptr);
-    Q_INVOKABLE QList<int> getKeymap();
+    Q_INVOKABLE QList<int> getKeyWidth();
+    Q_INVOKABLE QList<QString> getKeyRepr();
+    Q_INVOKABLE customize(int index);
 
 signals:
 
@@ -18,10 +20,12 @@ public slots:
     // QWidget interface
 protected:
     void resizeEvent(QResizeEvent *event);
-    void paintEvent(QPaintEvent *event);
 
 private:
     QQuickWidget *view;
+
+private slots:
+    void updateRepr(int, QString);
 };
 
 #endif // KEYMAP_H
