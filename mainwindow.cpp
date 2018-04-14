@@ -4,6 +4,10 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QResizeEvent>
+#include <QQuickView>
+#include <QQuickWidget>
+#include <QDateTime>
+#include <QQmlContext>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -14,14 +18,6 @@
 inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
-
-const ZArray<ZArray<int>> layoutAnsi60 = {
-    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, },
-    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, },
-    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, },
-    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, },
-    { 5, 5, 5, 25, 5, 5, 5, 5, },
-};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -34,21 +30,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
-
-    auto keyboardLayout = layoutAnsi60;
-    QGridLayout *kLayout = (QGridLayout *)ui->keymap->layout();
-
-    int k = 1;
-    for(int i = 0; i < keyboardLayout.size(); ++i){
-        int crow = 0;
-        for(int j = 0; j < keyboardLayout[i].size(); ++j, ++k){
-            int u = keyboardLayout[i][j];
-            kLayout->addWidget(new KeymapButton(k, u, ui->keymap), i, crow, 1, u);
-            crow += u;
-        }
-        kLayout->addItem(new QSpacerItem(1, 1), i, crow, 1, 1);
-//        kLayout->setRowStretch(i, 1);
-    }
 }
 
 MainWindow::~MainWindow(){
@@ -118,15 +99,15 @@ void MainWindow::onCommandDone(bool ret){
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event){
-    auto list = ui->keymap->findChildren<KeymapButton *>();
+//    auto list = ui->keymap->findChildren<KeymapButton *>();
 //    int width = event->size().width();
 //    int height = event->size().height();
-    int width = ui->keymapContainer->size().width();
-    int height = ui->keymapContainer->size().height();
+//    int width = ui->keymapContainer->size().width();
+//    int height = ui->keymapContainer->size().height();
 //    LOG("resize " << width << ", " << height);
-    foreach(KeymapButton *w, list){
-        w->forSize(width, height);
-    }
+//    foreach(KeymapButton *w, list){
+//        w->forSize(width, height);
+//    }
 }
 
 void MainWindow::on_rescanButton_clicked(){
