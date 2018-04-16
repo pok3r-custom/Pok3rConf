@@ -1,11 +1,13 @@
 #include "keymap.h"
+#include "keycustomize.h"
 
 #include <QDateTime>
 #include <QQmlContext>
 #include <QLayout>
+
 #include "zlog.h"
 #include "zlist.h"
-#include "keycustomize.h"
+#include "zjson.h"
 
 using namespace LibChaos;
 
@@ -36,6 +38,57 @@ KeyMap::KeyMap(QWidget *parent) : QWidget(parent)
     view->show();
 }
 
+void KeyMap::loadKeymap(QString url)
+{
+    QFile file(url);
+    if(!file.open(QIODevice::ReadOnly)){
+        LOG("Resource file error");
+        return;
+    }
+    QString data = file.readAll();
+    file.close();
+    ZJSON json;
+    if(!json.decode(data.toStdString())){
+        LOG("JSON parse error");
+        return;
+    }
+
+    LOG("Layout: " << json["name"].string());
+    for(auto it = json["layout"].array().begin(); it.more(); ++it){
+        ZList<int> row;
+        for(auto jt = it.get().array().begin(); jt.more(); ++jt){
+            row.push(jt.get().number());
+        }
+        layout.push(row);
+    }
+
+    for(auto it = json["layers"].array().begin(); it.more(); ++it){
+        ZList<ZString> row;
+        for(auto jt = it.get().array().begin(); jt.more(); ++jt){
+            row.push(jt.get().string());
+        }
+        layers.push(row);
+    }
+
+    // print out layout
+    int i = 0;
+    for (auto it = layout.cbegin(); it.more(); ++it){
+        RLOG("R" << i++);
+        for (auto jt = it.get().cbegin(); jt.more(); ++jt){
+            RLOG(" " << jt.get());
+        }
+        RLOG(ZLog::NEWLN);
+    }
+    i = 0;
+    for (auto it = layers.begin(); it.more(); ++it){
+        RLOG("L" << i++);
+        for (auto jt = it.get().cbegin(); jt.more(); ++jt){
+            RLOG(" '" << jt.get() << "'");
+        }
+        RLOG(ZLog::NEWLN);
+    }
+}
+
 QList<int> KeyMap::getKeyWidth()
 {
     QList<int> keymap;
@@ -57,7 +110,7 @@ QList<QString> KeyMap::getKeyRepr()
     return keymap;
 }
 
-KeyMap::customize(int index)
+void KeyMap::customize(int index)
 {
    KeyCustomize *keyCustomize = new KeyCustomize(this);
    keyCustomize->show();
@@ -76,6 +129,7 @@ void KeyMap::resizeEvent(QResizeEvent *event)
 
 void KeyMap::updateRepr(int index, QString value)
 {
+    LOG("Map key: " << index << " -> " << value.toStdString());
     QObject *obj = (QObject*) view->rootObject();
     QMetaObject::invokeMethod(obj, "updateRepr",
                               Q_ARG(QVariant, index),

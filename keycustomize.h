@@ -7,8 +7,7 @@ namespace Ui {
 class KeyCustomize;
 }
 
-class KeyCustomize : public QDialog
-{
+class KeyCustomize : public QDialog {
     Q_OBJECT
 
 public:
@@ -18,8 +17,8 @@ public:
 private:
     Ui::KeyCustomize *ui;
 
-Q_SIGNALS:
-    acceptedKey(QString);
+signals:
+    void acceptedKey(QString str);
 
     // QDialog interface
 public slots:

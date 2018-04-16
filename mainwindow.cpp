@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
+
+    ui->keymap->loadKeymap(":/keymaps/ansi60.json");
 }
 
 MainWindow::~MainWindow(){

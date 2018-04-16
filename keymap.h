@@ -4,18 +4,22 @@
 #include <QWidget>
 #include <QQuickWidget>
 
-class KeyMap : public QWidget
-{
+#include "zarray.h"
+#include "zlist.h"
+#include "zstring.h"
+using namespace LibChaos;
+
+class KeyMap : public QWidget {
     Q_OBJECT
 public:
     explicit KeyMap(QWidget *parent = nullptr);
+
+    void loadKeymap(QString url);
+
+    // called from qml
     Q_INVOKABLE QList<int> getKeyWidth();
     Q_INVOKABLE QList<QString> getKeyRepr();
-    Q_INVOKABLE customize(int index);
-
-signals:
-
-public slots:
+    Q_INVOKABLE void customize(int index);
 
     // QWidget interface
 protected:
@@ -26,6 +30,10 @@ private:
 
 private slots:
     void updateRepr(int, QString);
+
+private:
+    ZList<ZList<int>> layout;
+    ZArray<ZList<ZString>> layers;
 };
 
 #endif // KEYMAP_H
