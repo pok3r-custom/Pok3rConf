@@ -8,13 +8,11 @@ KeyCustomize::KeyCustomize(QWidget *parent) :
     ui->setupUi(this);
 }
 
-KeyCustomize::~KeyCustomize()
-{
+KeyCustomize::~KeyCustomize(){
     delete ui;
 }
 
-void KeyCustomize::accept()
-{
+void KeyCustomize::accept(){
     QDialog::accept();
 
     emit acceptedKey(ui->key->text());

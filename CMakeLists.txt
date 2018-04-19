@@ -24,8 +24,6 @@ set(SRC
     mainwindow.cpp
     mainworker.h
     mainworker.cpp
-    keymapbutton.h
-    keymapbutton.cpp
     keymap.h
     keymap.cpp
     keycustomize.h

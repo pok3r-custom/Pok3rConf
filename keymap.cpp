@@ -11,8 +11,7 @@
 
 using namespace LibChaos;
 
-KeyMap::KeyMap(QWidget *parent) : QWidget(parent)
-{
+KeyMap::KeyMap(QWidget *parent) : QWidget(parent){
     view = new QQuickWidget();
     view->rootContext()->setContextProperty("keymapper", this);
     view->setSource(QUrl(QStringLiteral("qrc:///keymap.qml")));
@@ -25,8 +24,7 @@ KeyMap::KeyMap(QWidget *parent) : QWidget(parent)
     view->show();
 }
 
-void KeyMap::loadKeymap(QString url)
-{
+void KeyMap::loadKeymap(QString url){
     QFile file(url);
     if(!file.open(QIODevice::ReadOnly)){
         LOG("Resource file error");
@@ -92,15 +90,12 @@ void KeyMap::loadKeymap(QString url)
     }
 }
 
-void KeyMap::setLayer(int layer)
-{
+void KeyMap::setLayer(int layer){
     QObject *obj = (QObject*) view->rootObject();
-    QMetaObject::invokeMethod(obj, "updateLayout",
-                              Q_ARG(QVariant, layer));
+    QMetaObject::invokeMethod(obj, "updateLayout", Q_ARG(QVariant, layer));
 }
 
-QList<int> KeyMap::getKeyLayout()
-{
+QList<int> KeyMap::getKeyLayout(){
     QList<int> keymap;
     for (auto it = layout.cbegin(); it.more(); ++it) {
         for (auto jt = it.get().cbegin(); jt.more(); ++jt) {
@@ -111,8 +106,7 @@ QList<int> KeyMap::getKeyLayout()
     return keymap;
 }
 
-QList<QString> KeyMap::getKeyLayer(int layer)
-{
+QList<QString> KeyMap::getKeyLayer(int layer){
     QList<QString> keymap;
     for (auto it = layers[layer].cbegin(); it.more(); ++it) {
         keymap.append(it.get());
@@ -120,16 +114,14 @@ QList<QString> KeyMap::getKeyLayer(int layer)
     return keymap;
 }
 
-void KeyMap::customize(int index)
-{
+void KeyMap::customize(int index){
    KeyCustomize *keyCustomize = new KeyCustomize(this);
    keyCustomize->show();
    keyCustomize->accepted();
    connect(keyCustomize, &KeyCustomize::acceptedKey, [=](const QString &value){ this->updateRepr(index, value); });
 }
 
-void KeyMap::resizeEvent(QResizeEvent *event)
-{
+void KeyMap::resizeEvent(QResizeEvent *event){
     // FIXME somehow make this automatic based on layout, so we don't need to do this manually
     QObject *obj = (QObject*) view->rootObject();
     QMetaObject::invokeMethod(obj, "setSize",
@@ -137,8 +129,7 @@ void KeyMap::resizeEvent(QResizeEvent *event)
                               Q_ARG(QVariant, event->size().height()));
 }
 
-void KeyMap::updateRepr(int index, QString value)
-{
+void KeyMap::updateRepr(int index, QString value){
     LOG("Map key: " << index << " -> " << value.toStdString());
     QObject *obj = (QObject*) view->rootObject();
     QMetaObject::invokeMethod(obj, "updateRepr",
