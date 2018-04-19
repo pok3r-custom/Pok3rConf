@@ -4,6 +4,10 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QResizeEvent>
+#include <QQuickView>
+#include <QQuickWidget>
+#include <QDateTime>
+#include <QQmlContext>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -14,26 +18,6 @@
 inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
-
-#define SP      0x80
-#define SP_MSK  0x7F
-
-const ZArray<ZArray<int>> layoutAnsi60 = {
-    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8 },
-    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6 },
-    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9 },
-    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11 },
-    { 5, 5, 5, 25, 5, 5, 5, 5 }
-};
-
-const ZArray<ZArray<int>> layoutAnsi80 = {
-    { 4, SP|4, 4, 4, 4, 4, SP|2, 4, 4, 4, 4, SP|2, 4, 4, 4, 4, SP|1, 4, 4, 4 },
-    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, SP|1, 4, 4, 4 },
-    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, SP|1, 4, 4, 4 },
-    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, SP|13 },
-    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, SP|5, 4, SP|4 },
-    { 5, 5, 5, 25, 5, 5, 5, 5, SP|1, 4, 4, 4 }
-};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -47,26 +31,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
-    auto keyboardLayout = layoutAnsi80;
-    QGridLayout *kLayout = (QGridLayout *)ui->keymap->layout();
-
-    int mcol = 0;
-    int k = 1;
-    for(int i = 0; i < keyboardLayout.size(); ++i){
-        int ccol = 0;
-        for(int j = 0; j < keyboardLayout[i].size(); ++j){
-            int d = keyboardLayout[i][j];
-            int u = d & SP_MSK;
-            if(d & SP){
-                kLayout->addItem(new QSpacerItem(1, 1), i, ccol, 1, u);
-            } else {
-                kLayout->addWidget(new KeymapButton(k, u, ui->keymap), i, ccol, 1, u);
-                ++k;
-            }
-            ccol += u;
-            mcol = qMax(mcol, ccol);
+    connect(ui->keymap, &KeyMap::keymapLoaded, [=](const int &layers){
+        LOG("GOT " << layers);
+        ui->layerSelection->clear();
+        for (int i = 0; i < layers; ++i) {
+            ui->layerSelection->addItem(QString("Layer %1").arg(i + 1));
         }
-    }
+    });
+
+    ui->keymap->loadKeymap(":/keymaps/ansi60.json");
 }
 
 MainWindow::~MainWindow(){
@@ -136,15 +109,15 @@ void MainWindow::onCommandDone(bool ret){
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event){
-    auto list = ui->keymap->findChildren<KeymapButton *>();
+//    auto list = ui->keymap->findChildren<KeymapButton *>();
 //    int width = event->size().width();
 //    int height = event->size().height();
-    int width = ui->keymapContainer->size().width();
-    int height = ui->keymapContainer->size().height();
+//    int width = ui->keymapContainer->size().width();
+//    int height = ui->keymapContainer->size().height();
 //    LOG("resize " << width << ", " << height);
-    foreach(KeymapButton *w, list){
-        w->forSize(width, height);
-    }
+//    foreach(KeymapButton *w, list){
+//        w->forSize(width, height);
+//    }
 }
 
 void MainWindow::on_rescanButton_clicked(){
@@ -204,4 +177,9 @@ void MainWindow::on_bootButton_clicked(){
 void MainWindow::on_fileEdit_textChanged(const QString &arg1)
 {
     settings.setValue(CUSTOM_FIRMWARE_LOCATION, arg1);
+}
+
+void MainWindow::on_layerSelection_currentIndexChanged(int index)
+{
+    ui->keymap->setLayer(index);
 }

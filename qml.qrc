@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>keymap.qml</file>
+        <file>keymaps/ansi60.json</file>
+        <file>keymaps/ansi80.json</file>
+    </qresource>
+</RCC>

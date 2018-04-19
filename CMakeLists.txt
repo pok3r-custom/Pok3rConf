@@ -7,10 +7,15 @@ add_subdirectory(pok3rtool)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Qml QuickWidgets Widgets REQUIRED)
 
 qt5_wrap_ui(UI_SRC
     mainwindow.ui
+    keycustomize.ui
+)
+
+qt5_add_resources(RC_SRC
+    qml.qrc
 )
 
 set(SRC
@@ -21,15 +26,23 @@ set(SRC
     mainworker.cpp
     keymapbutton.h
     keymapbutton.cpp
+    keymap.h
+    keymap.cpp
+    keycustomize.h
+    keycustomize.cpp
     ${UI_SRC}
+    ${RC_SRC}
 )
+
+include_directories(${Qt5Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
 
 if(WIN32)
     add_executable(pok3rconf WIN32 ${SRC})
 else()
     add_executable(pok3rconf ${SRC})
 endif()
-target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets)
+#qt5_use_modules(pok3rconf Quick Core)
+target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets)
 
 # Copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD
