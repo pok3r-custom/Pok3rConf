@@ -15,10 +15,11 @@ public:
     explicit KeyMap(QWidget *parent = nullptr);
 
     void loadKeymap(QString url);
+    void setLayer(int layer);
 
-    // called from qml
-    Q_INVOKABLE QList<int> getKeyWidth();
-    Q_INVOKABLE QList<QString> getKeyRepr();
+    // Can be called from qml
+    Q_INVOKABLE QList<int> getKeyLayout();
+    Q_INVOKABLE QList<QString> getKeyLayer(int layer);
     Q_INVOKABLE void customize(int index);
 
     // QWidget interface
@@ -29,11 +30,14 @@ private:
     QQuickWidget *view;
 
 private slots:
-    void updateRepr(int, QString);
+    void updateRepr(int index, QString value);
+
+signals:
+    void keymapLoaded(int layers);
 
 private:
     ZList<ZList<int>> layout;
-    ZArray<ZList<ZString>> layers;
+    ZArray<ZList<QString>> layers;
 };
 
 #endif // KEYMAP_H

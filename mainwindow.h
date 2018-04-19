@@ -44,6 +44,8 @@ private slots:
 
     void on_fileEdit_textChanged(const QString &arg1);
 
+    void on_layerSelection_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
     bool scanning;

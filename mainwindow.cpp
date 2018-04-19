@@ -31,6 +31,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
+    connect(ui->keymap, &KeyMap::keymapLoaded, [=](const int &layers){
+        LOG("GOT " << layers);
+        ui->layerSelection->clear();
+        for (int i = 0; i < layers; ++i) {
+            ui->layerSelection->addItem(QString("Layer %1").arg(i + 1));
+        }
+    });
+
     ui->keymap->loadKeymap(":/keymaps/ansi60.json");
 }
 
@@ -169,4 +177,9 @@ void MainWindow::on_bootButton_clicked(){
 void MainWindow::on_fileEdit_textChanged(const QString &arg1)
 {
     settings.setValue(CUSTOM_FIRMWARE_LOCATION, arg1);
+}
+
+void MainWindow::on_layerSelection_currentIndexChanged(int index)
+{
+    ui->keymap->setLayer(index);
 }

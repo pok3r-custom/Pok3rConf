@@ -3,7 +3,7 @@ import QtQuick.Controls 2.0
 
 Rectangle {
     id: win
-//    color: "orange"
+    color: "transparent"
 
     function setSize(width, height) {
         win.width = width
@@ -18,7 +18,7 @@ Rectangle {
         id: keyboard
         width: 600
         height: 200
-//        color: 'blue'
+        color: "transparent"
 
         transform: [
             Scale {
@@ -35,10 +35,11 @@ Rectangle {
         property variant keys: []
     }
 
-    Component.onCompleted: {
-        var keyWidthList = keymapper.getKeyWidth()
-        var keyReprList = keymapper.getKeyRepr()
+    function updateLayout(layer) {
+        var keyWidthList = keymapper.getKeyLayout()
+        var keyReprList = keymapper.getKeyLayer(layer)
 
+        keyboard.keys = []
         var x = 0
         var y = 0
         var largestWidth = 0
@@ -67,7 +68,7 @@ Rectangle {
                     height: 20
                     text: qsTr(\"" + keyReprList[key - y] + "\")
                     onClicked: keymapper.customize(" + (key - y) + ")
-                    padding: 0
+                    padding: 1
                     background: Rectangle {
                         color: keycap.down ? \"#d6d6d6\" : \"#f6f6f6\"
                         border.color: \"#aaa\"
@@ -79,7 +80,17 @@ Rectangle {
                         color: \"#404244\"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideNone
+                        font.family: \"monospace\"
+                        // If text goes out of bounds, don't overflow, because the background does not get repainted
+                        clip: true
+                        // Sets a custom font size based on the container height/width
+                        fontSizeMode: Text.Fit
+                        // Needed for fontSizeMode
+                        minimumPointSize: 1
+                        // Don't put ellipsis for text larger than container (if we don't want to use fontSizeMode)
+//                        elide: Text.ElideNone
+                        // Disable desktop font size (if we don't want to use fontSizeMode)
+//                        font.pointSize: 8
                     }
                 }"
 

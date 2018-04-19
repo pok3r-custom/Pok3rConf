@@ -11,27 +11,14 @@
 
 using namespace LibChaos;
 
-const ZList<ZList<int>> layoutAnsi60 = {
-    { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, },
-    { 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, },
-    { 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 9, },
-    { 9, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, },
-    { 5, 5, 5, 25, 5, 5, 5, 5, },
-};
-
-const ZList<QString> layoutAnsiRepr60 = {
-    "ESC", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "+", "BACK",
-    "TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[", "]", "|",
-    "CAPS", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "ENTER",
-    "SHIFT", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "SHIFT",
-    "CTRL", "META", "ALT", "SPACE", "ALT", "FN", "MENU", "CTRL",
-};
-
 KeyMap::KeyMap(QWidget *parent) : QWidget(parent)
 {
     view = new QQuickWidget();
     view->rootContext()->setContextProperty("keymapper", this);
     view->setSource(QUrl(QStringLiteral("qrc:///keymap.qml")));
+    view->setClearColor(Qt::transparent);
+    // Needed to make the background transparent
+    view->setAttribute(Qt::WA_AlwaysStackOnTop, true);
     QLayout *layout = new QVBoxLayout();
     layout->addWidget(view);
     setLayout(layout);
@@ -63,15 +50,20 @@ void KeyMap::loadKeymap(QString url)
     }
 
     for(auto it = json["layers"].array().begin(); it.more(); ++it){
-        ZList<ZString> row;
+        ZList<QString> row;
         for(auto jt = it.get().array().begin(); jt.more(); ++jt){
-            row.push(jt.get().string());
+            row.push(jt.get().string().cc());
         }
         layers.push(row);
     }
 
+    LOG("EMIT " << layers.size());
+    emit keymapLoaded(layers.size());
+
+    setLayer(0);
+
     // print out layout
-    int i = 0;
+    /*int i = 0;
     for (auto it = layout.cbegin(); it.more(); ++it){
         RLOG("R" << i++);
         for (auto jt = it.get().cbegin(); jt.more(); ++jt){
@@ -83,16 +75,23 @@ void KeyMap::loadKeymap(QString url)
     for (auto it = layers.begin(); it.more(); ++it){
         RLOG("L" << i++);
         for (auto jt = it.get().cbegin(); jt.more(); ++jt){
-            RLOG(" '" << jt.get() << "'");
+            RLOG(" '" << jt.get().toStdString() << "'");
         }
         RLOG(ZLog::NEWLN);
-    }
+    }*/
 }
 
-QList<int> KeyMap::getKeyWidth()
+void KeyMap::setLayer(int layer)
+{
+    QObject *obj = (QObject*) view->rootObject();
+    QMetaObject::invokeMethod(obj, "updateLayout",
+                              Q_ARG(QVariant, layer));
+}
+
+QList<int> KeyMap::getKeyLayout()
 {
     QList<int> keymap;
-    for (auto it = layoutAnsi60.cbegin(); it.more(); ++it) {
+    for (auto it = layout.cbegin(); it.more(); ++it) {
         for (auto jt = it.get().cbegin(); jt.more(); ++jt) {
             keymap.append(jt.get());
         }
@@ -101,10 +100,10 @@ QList<int> KeyMap::getKeyWidth()
     return keymap;
 }
 
-QList<QString> KeyMap::getKeyRepr()
+QList<QString> KeyMap::getKeyLayer(int layer)
 {
     QList<QString> keymap;
-    for (auto it = layoutAnsiRepr60.cbegin(); it.more(); ++it) {
+    for (auto it = layers[layer].cbegin(); it.more(); ++it) {
         keymap.append(it.get());
     }
     return keymap;

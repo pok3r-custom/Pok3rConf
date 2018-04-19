@@ -206,18 +206,7 @@ p, li { white-space: pre-wrap; }
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QComboBox" name="comboBox">
-          <item>
-           <property name="text">
-            <string>Layer 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Layer N</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="layerSelection"/>
         </item>
         <item>
          <widget class="QWidget" name="keymapTabLayout" native="true">
@@ -391,7 +380,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>759</width>
-     <height>21</height>
+     <height>36</height>
     </rect>
    </property>
   </widget>
