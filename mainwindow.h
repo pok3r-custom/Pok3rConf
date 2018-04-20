@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "mainworker.h"
-#include "editor/keymap.h"
+#include "editor/keymapwidget.h"
 
 #include <QMainWindow>
 #include <QSettings>

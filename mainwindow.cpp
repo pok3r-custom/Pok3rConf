@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
-    connect(ui->keymap, &KeyMap::keymapLoaded, [=](const int &layers){
+    connect(ui->keymap, &KeymapWidget::keymapLoaded, [=](const int &layers){
         LOG("GOT " << layers);
         ui->layerSelection->clear();
         for (int i = 0; i < layers; ++i) {

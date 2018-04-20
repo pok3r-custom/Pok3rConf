@@ -1,5 +1,5 @@
-#ifndef KEYMAP_H
-#define KEYMAP_H
+#ifndef KEYMAPWIDGET_H
+#define KEYMAPWIDGET_H
 
 #include <QWidget>
 #include <QQuickWidget>
@@ -14,10 +14,10 @@ struct KeymapConfig {
     ZArray<QList<QString>> layers;
 };
 
-class KeyMap : public QWidget {
+class KeymapWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit KeyMap(QWidget *parent = nullptr);
+    explicit KeymapWidget(QWidget *parent = nullptr);
 
     void loadKeymap(KeymapConfig kc);
     void setLayer(int layer);
@@ -44,4 +44,4 @@ private:
     KeymapConfig kmap;
 };
 
-#endif // KEYMAP_H
+#endif // KEYMAPWIDGET_H

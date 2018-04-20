@@ -24,8 +24,8 @@ set(SRC
     mainwindow.cpp
     mainworker.h
     mainworker.cpp
-    editor/keymap.h
-    editor/keymap.cpp
+    editor/keymapwidget.h
+    editor/keymapwidget.cpp
     editor/keycustomize.h
     editor/keycustomize.cpp
     ${UI_SRC}
