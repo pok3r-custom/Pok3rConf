@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "mainworker.h"
+#include "keymap.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -53,6 +54,7 @@ private:
     KeyboardCommand currcmd;
     QSettings settings;
     const QString CUSTOM_FIRMWARE_LOCATION = "customFirmwareLocation";
+    ZMap<ZString, KeymapConfig> keymaps;
 };
 
 #endif // MAINWINDOW_H

@@ -24,70 +24,13 @@ KeyMap::KeyMap(QWidget *parent) : QWidget(parent){
     view->show();
 }
 
-void KeyMap::loadKeymap(QString url){
-    QFile file(url);
-    if(!file.open(QIODevice::ReadOnly)){
-        LOG("Resource file error");
-        return;
-    }
-    QString data = file.readAll();
-    file.close();
+void KeyMap::loadKeymap(KeymapConfig kc){
+    kmap = kc;
 
-    try {
-        ZJSON json;
-        if(!json.decode(data.toStdString())){
-            LOG("JSON parse error");
-            return;
-        }
+    LOG("EMIT " << kmap.layers.size());
+    emit keymapLoaded(kmap.layers.size());
 
-        LOG("Layout: " << json["name"].string());
-        int keycount = 0;
-        for(auto it = json["layout"].array().begin(); it.more(); ++it){
-            ZList<int> row;
-            for(auto jt = it.get().array().begin(); jt.more(); ++jt){
-                int width = jt.get().number();
-                row.push(width);
-                if(width < 100)
-                    ++keycount;
-            }
-            layout.push(row);
-        }
-
-        for(auto it = json["layers"].array().begin(); it.more(); ++it){
-            ZList<QString> layer;
-            for(auto jt = it.get().array().begin(); jt.more(); ++jt){
-                layer.push(jt.get().string().cc());
-            }
-            if(layer.size() != keycount)
-                throw ZException(ZString("Invalid layer keymap size: ") + layer.size());
-            layers.push(layer);
-        }
-
-        // print out layout
-        /*int i = 0;
-        for (auto it = layout.cbegin(); it.more(); ++it){
-            RLOG("R" << i++);
-            for (auto jt = it.get().cbegin(); jt.more(); ++jt){
-                RLOG(" " << jt.get());
-            }
-            RLOG(ZLog::NEWLN);
-        }
-        i = 0;
-        for (auto it = layers.begin(); it.more(); ++it){
-            RLOG("L" << i++);
-            for (auto jt = it.get().cbegin(); jt.more(); ++jt){
-                RLOG(" '" << jt.get().toStdString() << "'");
-            }
-            RLOG(ZLog::NEWLN);
-        }*/
-
-        LOG("EMIT " << layers.size());
-        emit keymapLoaded(layers.size());
-
-        setLayer(0);
-    } catch(ZException e){
-        ELOG("Keymap error: " << e.what());
-    }
+    setLayer(0);
 }
 
 void KeyMap::setLayer(int layer){
@@ -96,22 +39,11 @@ void KeyMap::setLayer(int layer){
 }
 
 QList<int> KeyMap::getKeyLayout(){
-    QList<int> keymap;
-    for (auto it = layout.cbegin(); it.more(); ++it) {
-        for (auto jt = it.get().cbegin(); jt.more(); ++jt) {
-            keymap.append(jt.get());
-        }
-        keymap.append(-1);
-    }
-    return keymap;
+    return kmap.layout;
 }
 
 QList<QString> KeyMap::getKeyLayer(int layer){
-    QList<QString> keymap;
-    for (auto it = layers[layer].cbegin(); it.more(); ++it) {
-        keymap.append(it.get());
-    }
-    return keymap;
+    return kmap.layers[layer];
 }
 
 void KeyMap::customize(int index){

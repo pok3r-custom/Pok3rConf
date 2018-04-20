@@ -9,12 +9,17 @@
 #include "zstring.h"
 using namespace LibChaos;
 
+struct KeymapConfig {
+    QList<int> layout;
+    ZArray<QList<QString>> layers;
+};
+
 class KeyMap : public QWidget {
     Q_OBJECT
 public:
     explicit KeyMap(QWidget *parent = nullptr);
 
-    void loadKeymap(QString url);
+    void loadKeymap(KeymapConfig kc);
     void setLayer(int layer);
 
     // Can be called from qml
@@ -36,8 +41,7 @@ signals:
     void keymapLoaded(int layers);
 
 private:
-    ZList<ZList<int>> layout;
-    ZArray<ZList<QString>> layers;
+    KeymapConfig kmap;
 };
 
 #endif // KEYMAP_H

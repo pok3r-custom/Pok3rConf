@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QFileDialog>
 #include <QDir>
+#include <QDirIterator>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QResizeEvent>
@@ -12,6 +13,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "zjson.h"
 #include "zlog.h"
 
 inline QString toQStr(ZString str){
@@ -38,7 +40,55 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
-    ui->keymap->loadKeymap(":/keymaps/ansi60.json");
+    QDirIterator it(":/keymaps", QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QFile file(it.next());
+        if(!file.open(QIODevice::ReadOnly)){
+            LOG("Resource file error");
+            return;
+        }
+        QString data = file.readAll();
+        file.close();
+
+        KeymapConfig config;
+        try {
+            ZJSON json;
+            if(!json.decode(data.toStdString())){
+                LOG("JSON parse error");
+                return;
+            }
+
+            ZString name = json["name"].string();
+            int keycount = 0;
+            for(auto it = json["layout"].array().begin(); it.more(); ++it){
+                for(auto jt = it.get().array().begin(); jt.more(); ++jt){
+                    int width = jt.get().number();
+                    config.layout.append(width);
+                    if(width < 100)
+                        ++keycount;
+                }
+                config.layout.append(-1);
+            }
+
+            for(auto it = json["layers"].array().begin(); it.more(); ++it){
+                QList<QString> qlayer;
+                for(auto jt = it.get().array().begin(); jt.more(); ++jt){
+                    qlayer.append(toQStr(jt.get().string()));
+                }
+                if(qlayer.size() != keycount)
+                    throw ZException(ZString("Invalid layer keymap size: ") + qlayer.size());
+                config.layers.push(qlayer);
+            }
+
+            LOG("Keymap: " << name << ", " << keycount << " keys, " << config.layers.size() << " layers");
+
+            keymaps.add(name, config);
+        } catch(ZException e){
+            ELOG("Keymap error: " << e.what());
+        }
+    }
+
+    ui->keymap->loadKeymap(keymaps["ansi60"]);
 }
 
 MainWindow::~MainWindow(){
