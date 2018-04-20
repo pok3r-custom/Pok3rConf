@@ -24,10 +24,12 @@ enum KeyboardCommand {
 };
 
 struct KeyboardDevice {
+    DeviceType devtype;
     ZString name;
     ZString version;
-    int flags;
     zu64 key;
+    int flags;
+    ZString layoutname;
 };
 
 class MainWorker : public QObject {

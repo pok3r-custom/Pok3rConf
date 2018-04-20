@@ -10,6 +10,15 @@
 #include "zmap.h"
 #include "zrandom.h"
 
+struct SupportedDevice {
+    int flags;
+    ZString layout;
+};
+
+const ZMap<DeviceType, SupportedDevice> supported_devices = {
+    { DEV_POK3R,    { FLAG_NONE, "ansi60" }},
+};
+
 inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
@@ -34,15 +43,19 @@ void MainWorker::onDoRescan(){
         ZString version = dev.iface->getVersion();
         zu64 key = random.genzu();
         kdevs.add(key, dev);
-        list.push({ dev.info.name, version, FLAG_NONE, key });
+        list.push({ dev.devtype, dev.info.name, version, key });
     }
 
     if(fake){
-        list.push({ "Fake Pok3r", "N/A", FLAG_NONE, 0 });
+        list.push({ DEV_POK3R, "Fake Pok3r", "N/A", 0 });
     }
 
     for(auto it = list.begin(); it.more(); ++it){
         auto dev = it.get();
+        if(supported_devices.contains(dev.devtype)){
+            it.get().flags = supported_devices[dev.devtype].flags;
+            it.get().layoutname = supported_devices[dev.devtype].layout;
+        }
         LOG(dev.name << ": " << dev.version << " [" << dev.key << "]");
     }
 

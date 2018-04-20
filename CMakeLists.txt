@@ -15,7 +15,7 @@ qt5_wrap_ui(UI_SRC
 )
 
 qt5_add_resources(RC_SRC
-    qml.qrc
+    resource.qrc
 )
 
 set(SRC
@@ -24,10 +24,10 @@ set(SRC
     mainwindow.cpp
     mainworker.h
     mainworker.cpp
-    keymap.h
-    keymap.cpp
-    keycustomize.h
-    keycustomize.cpp
+    editor/keymap.h
+    editor/keymap.cpp
+    editor/keycustomize.h
+    editor/keycustomize.cpp
     ${UI_SRC}
     ${RC_SRC}
 )

@@ -43,7 +43,12 @@ QList<int> KeyMap::getKeyLayout(){
 }
 
 QList<QString> KeyMap::getKeyLayer(int layer){
-    return kmap.layers[layer];
+    if(layer >= 0 && layer < kmap.layers.size()){
+        return kmap.layers[layer];
+    } else {
+        ELOG("getLayer " << layer);
+        return QList<QString>();
+    }
 }
 
 void KeyMap::customize(int index){

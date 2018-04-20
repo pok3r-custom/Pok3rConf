@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
+    // Load all keymaps
     QDirIterator it(":/keymaps", QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QFile file(it.next());
@@ -87,8 +88,6 @@ MainWindow::MainWindow(QWidget *parent) :
             ELOG("Keymap error: " << e.what());
         }
     }
-
-    ui->keymap->loadKeymap(keymaps["ansi60"]);
 }
 
 MainWindow::~MainWindow(){
@@ -199,6 +198,12 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
             ui->supported->setText("Keyboard is not yet supported");
             ui->supported->setStyleSheet("QLabel { color: red; }");
             ui->flashButton->setEnabled(false);
+        }
+        ZString layout = klist[index].layoutname;
+        if(keymaps.contains(layout)){
+            ui->keymap->loadKeymap(keymaps[layout]);
+        } else {
+            ELOG("Invalid layout " << layout);
         }
     }
 }
