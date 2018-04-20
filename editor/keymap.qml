@@ -53,6 +53,13 @@ Rectangle {
                 continue;
             }
 
+            var space = false;
+            if (num > 100) {
+                space = true;
+                num -= 100;
+            }
+            // jeremy, if space == true, there should be an empty spacer
+
             var keyX = 8 * x
             var keyY = 25 * y
             var keyWidth = 8 * num
