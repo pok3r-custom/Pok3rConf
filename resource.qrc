@@ -3,5 +3,8 @@
         <file alias="keymap.qml">editor/keymap.qml</file>
         <file>keymaps/ansi60.json</file>
         <file>keymaps/ansi80.json</file>
+        <file>keymaps/ansi60_spls.json</file>
+        <file>keymaps/ansi60_splsrs.json</file>
+        <file>keymaps/ansi60_sprs.json</file>
     </qresource>
 </RCC>
