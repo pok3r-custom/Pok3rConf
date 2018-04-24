@@ -84,3 +84,13 @@ if(MINGW)
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()
+
+if(NOT WIN32)
+    add_custom_target(firmware
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/qmk_firmware
+        COMMAND make vortex/pok3r:chaos
+        COMMAND make vortex/pok3r_rgb:chaos
+        COMMAND make vortex/core:chaos
+    )
+endif()
+

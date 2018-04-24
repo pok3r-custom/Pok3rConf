@@ -1,3 +1,6 @@
 [submodule "pok3rtool"]
 	path = pok3rtool
 	url = https://github.com/pok3r-custom/pok3rtool.git
+[submodule "qmk_firmware"]
+	path = qmk_firmware
+	url = https://github.com/pok3r-custom/qmk_firmware.git

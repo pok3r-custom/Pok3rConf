@@ -16,7 +16,11 @@ struct SupportedDevice {
 };
 
 const ZMap<DeviceType, SupportedDevice> supported_devices = {
-    { DEV_POK3R,    { FLAG_NONE, "ansi60" }},
+    { DEV_POK3R,        { FLAG_NONE, "ansi60" } },
+    { DEV_POK3R_RGB,    { FLAG_NONE, "ansi60" } },
+    { DEV_POK3R_RGB2,   { FLAG_NONE, "ansi60" } },
+    { DEV_KBP_V60,      { FLAG_NONE, "ansi60" } },
+    { DEV_KBP_V80,      { FLAG_NONE, "ansi80" } },
 };
 
 inline QString toQStr(ZString str){
