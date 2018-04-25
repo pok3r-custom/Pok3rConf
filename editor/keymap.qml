@@ -16,8 +16,6 @@ Rectangle {
 
     Rectangle {
         id: keyboard
-        width: 600
-        height: 200
         color: "transparent"
 
         transform: [
@@ -35,10 +33,13 @@ Rectangle {
         property variant keys: []
     }
 
-    function updateLayout(layer) {
-        var keyWidthList = keymapper.getKeyLayout()
-        var keyReprList = keymapper.getKeyLayer(layer)
+    property var keyWidthList: []
 
+    function setKeyLayout(layout) {
+        keyWidthList = layout;
+    }
+
+    function updateLayer(keyReprList) {
         for (var key in keyboard.keys) {
             keyboard.keys[key].destroy()
         }
@@ -87,7 +88,7 @@ Rectangle {
                     width: " + localKeyWidth + "
                     height: " + keyHeight + "
                     text: qsTr(\"" + keyReprList[keyReprIndex] + "\")
-                    onClicked: keymapper.customize(" + keyReprIndex + ")
+                    onClicked: mainwindow.customizeKey(" + keyReprIndex + ")
                     padding: 1
                     background: Rectangle {
                         color: keycap.down ? \"#d6d6d6\" : \"#f6f6f6\"
@@ -125,7 +126,7 @@ Rectangle {
         }
 
         // TODO remove the 16 magic margin number once dynamic width works
-        keyboard.width = largestWidth + 16
-        keyboard.height = y * (keyHeight + keyMargin) + 16
+        keyboard.width = largestWidth
+        keyboard.height = y * (keyHeight + keyMargin)
     }
 }

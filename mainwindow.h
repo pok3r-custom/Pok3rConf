@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "mainworker.h"
-#include "editor/keymapwidget.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -11,13 +10,18 @@ namespace Ui {
     class MainWindow;
 }
 
+struct KeymapConfig {
+    QList<int> layout;
+    ZArray<QList<QString>> layers;
+};
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
     void connectWorker(MainWorker *worker);
+    Q_INVOKABLE void customizeKey(int index);
 
 private:
     void startCommand(KeyboardCommand cmd);
@@ -40,12 +44,10 @@ private slots:
     void on_browseButton_clicked();
     void on_uploadButton_clicked();
     void on_rebootButton_clicked();
-
     void on_bootButton_clicked();
-
     void on_fileEdit_textChanged(const QString &arg1);
-
     void on_layerSelection_currentIndexChanged(int index);
+    void updateRepr(int index, QString value);
 
 private:
     Ui::MainWindow *ui;
@@ -55,6 +57,9 @@ private:
     QSettings settings;
     const QString CUSTOM_FIRMWARE_LOCATION = "customFirmwareLocation";
     ZMap<ZString, KeymapConfig> keymaps;
+    void updateKeyLayer(int index);
+    void updateKeyLayout(int index);
+    int layoutIndex;
 };
 
 #endif // MAINWINDOW_H

@@ -12,6 +12,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "editor/keycustomize.h"
 
 #include "zjson.h"
 #include "zlog.h"
@@ -32,13 +33,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     ui->fileEdit->setText(settings.value(CUSTOM_FIRMWARE_LOCATION).toString());
 
-    connect(ui->keymap, &KeymapWidget::keymapLoaded, [=](const int &layers){
-        LOG("GOT " << layers);
-        ui->layerSelection->clear();
-        for (int i = 0; i < layers; ++i) {
-            ui->layerSelection->addItem(QString("Layer %1").arg(i + 1));
-        }
-    });
+    // Set keymap qml properties
+    ui->keymap->rootContext()->setContextProperty("mainwindow", this);
+    ui->keymap->setClearColor(Qt::transparent);
+    // Needed to make the background transparent
+    ui->keymap->setAttribute(Qt::WA_AlwaysStackOnTop, true);
 
     // Load all keymaps
     QDirIterator it(":/keymaps", QDirIterator::Subdirectories);
@@ -201,7 +200,7 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
         }
         ZString layout = klist[index].layoutname;
         if(keymaps.contains(layout)){
-            ui->keymap->loadKeymap(keymaps[layout]);
+            updateKeyLayout(index);
         } else {
             ELOG("Invalid layout " << layout);
         }
@@ -235,5 +234,51 @@ void MainWindow::on_fileEdit_textChanged(const QString &arg1)
 
 void MainWindow::on_layerSelection_currentIndexChanged(int index)
 {
-    ui->keymap->setLayer(index);
+    updateKeyLayer(index);
+}
+
+void MainWindow::updateKeyLayout(int index){
+    layoutIndex = index;
+    ZString layout = klist[index].layoutname;
+
+    QVariantList list;
+    for (auto item : keymaps[layout].layout) {
+        list << item;
+    }
+
+    QObject *obj = (QObject*) ui->keymap->rootObject();
+    QMetaObject::invokeMethod(obj, "setKeyLayout", Q_ARG(QVariant, list));
+    updateKeyLayer(0);
+
+    ui->layerSelection->clear();
+    for (int i = 0; i < keymaps[layout].layers.size(); ++i) {
+        ui->layerSelection->addItem(QString("Layer %1").arg(i + 1));
+    }
+}
+
+void MainWindow::updateKeyLayer(int index){
+    ZString layout = klist[layoutIndex].layoutname;
+
+    QVariantList list;
+    for (auto item : keymaps[layout].layers[index]) {
+        list << item;
+    }
+
+    QObject *obj = (QObject*) ui->keymap->rootObject();
+    QMetaObject::invokeMethod(obj, "updateLayer", Q_ARG(QVariant, list));
+}
+
+void MainWindow::customizeKey(int index){
+   KeyCustomize *keyCustomize = new KeyCustomize(this);
+   keyCustomize->show();
+   keyCustomize->accepted();
+   connect(keyCustomize, &KeyCustomize::acceptedKey, [=](const QString &value){ this->updateRepr(index, value); });
+}
+
+void MainWindow::updateRepr(int index, QString value){
+    LOG("Map key: " << index << " -> " << value.toStdString());
+    QObject *obj = (QObject*) ui->keymap->rootObject();
+    QMetaObject::invokeMethod(obj, "updateRepr",
+                              Q_ARG(QVariant, index),
+                              Q_ARG(QVariant, value));
 }
