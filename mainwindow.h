@@ -18,13 +18,19 @@ struct KeymapConfig {
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(bool devel, QWidget *parent = 0);
     ~MainWindow();
     void connectWorker(MainWorker *worker);
     Q_INVOKABLE void customizeKey(int index);
 
+protected:
+    // QWidget interface
+    void resizeEvent(QResizeEvent *event);
+
 private:
     void startCommand(KeyboardCommand cmd);
+    void updateKeyLayout(ZPointer<Keymap> keymap);
+    void updateKeyLayer(int index);
 
 signals:
     void doRescan();
@@ -33,10 +39,6 @@ signals:
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
     void onCommandDone(bool ret);
-
-    // QWidget interface
-protected:
-    void resizeEvent(QResizeEvent *event);
 
 private slots:
     void on_rescanButton_clicked();
@@ -55,11 +57,9 @@ private:
     ZArray<KeyboardDevice> klist;
     KeyboardCommand currcmd;
     QSettings settings;
+    ZPointer<Keymap> currentkeymap;
+
     const QString CUSTOM_FIRMWARE_LOCATION = "customFirmwareLocation";
-    ZMap<ZString, KeymapConfig> keymaps;
-    void updateKeyLayer(int index);
-    void updateKeyLayout(int index);
-    int layoutIndex;
 };
 
 #endif // MAINWINDOW_H

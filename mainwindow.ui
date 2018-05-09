@@ -62,8 +62,11 @@
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="noTab">
        <attribute name="title">
@@ -274,16 +277,6 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="kllTab">
-       <attribute name="title">
-        <string>KLL</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QPlainTextEdit" name="kllEdit"/>
-        </item>
-       </layout>
-      </widget>
       <widget class="QWidget" name="commandsTab">
        <attribute name="title">
         <string>Commands</string>
@@ -435,7 +428,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>759</width>
-     <height>36</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>

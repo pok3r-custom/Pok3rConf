@@ -11,10 +11,12 @@ using namespace LibChaos;
 
 #define OPT_VERBOSE "verbose"
 #define OPT_FAKE    "fake"
+#define OPT_DEVEL   "devel"
 
 const ZArray<ZOptions::OptDef> optdef = {
     { OPT_VERBOSE,  'v', ZOptions::NONE },
     { OPT_FAKE,     0, ZOptions::NONE },    // Add a fake device to device list
+    { OPT_DEVEL,    0, ZOptions::NONE },    // Show developer commands and options
 };
 
 #define TERM_RESET  "\x1b[m"
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]){
     QApplication::setApplicationName("Pok3rConf");
     QApplication::setApplicationVersion("0.1");
 
-    MainWindow window;
+    MainWindow window(options.getOpts().contains(OPT_DEVEL));
     MainWorker worker(options.getOpts().contains(OPT_FAKE));
     QThread thread;
 

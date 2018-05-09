@@ -10,17 +10,12 @@
 #include "zmap.h"
 #include "zrandom.h"
 
-struct SupportedDevice {
-    int flags;
-    ZString layout;
-};
-
-const ZMap<DeviceType, SupportedDevice> supported_devices = {
-    { DEV_POK3R,        { FLAG_NONE, "ansi60" } },
-    { DEV_POK3R_RGB,    { FLAG_NONE, "ansi60" } },
-    { DEV_POK3R_RGB2,   { FLAG_NONE, "ansi60" } },
-    { DEV_KBP_V60,      { FLAG_NONE, "ansi60" } },
-    { DEV_KBP_V80,      { FLAG_NONE, "ansi80" } },
+const ZMap<DeviceType, int> known_devices = {
+    { DEV_POK3R,        FLAG_SUPPORTED },
+    { DEV_POK3R_RGB,    FLAG_NONE },
+    { DEV_POK3R_RGB2,   FLAG_NONE },
+    { DEV_KBP_V60,      FLAG_NONE },
+    { DEV_KBP_V80,      FLAG_NONE },
 };
 
 inline QString toQStr(ZString str){
@@ -45,22 +40,44 @@ void MainWorker::onDoRescan(){
     for(auto it = devs.begin(); it.more(); ++it){
         auto dev = it.get();
         ZString version = dev.iface->getVersion();
+        int flags = FLAG_NONE;
+
+        if(dev.iface->isBuiltin()){
+            flags |= FLAG_BOOTLOADER;
+        }
+
+        ZPointer<Keymap> km;
+        if(dev.iface->isQMK()){
+            ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+            km = qmk->loadKeymap();
+            if(!km.get()){
+                ELOG("Failed to load keymap");
+            }
+            flags |= FLAG_QMK;
+        }
+
+        if(known_devices.contains(dev.devtype)){
+            flags |= known_devices[dev.devtype];
+        }
+
         zu64 key = random.genzu();
         kdevs.add(key, dev);
-        list.push({ dev.devtype, dev.info.name, version, key });
+        list.push({ dev.devtype, dev.info.name, version, key, flags, km });
     }
 
     if(fake){
-        list.push({ DEV_POK3R, "Fake Pok3r", "N/A", 0 });
+        list.push({ DEV_POK3R, "Fake Pok3r", "N/A", 0, FLAG_NONE, nullptr });
     }
 
     for(auto it = list.begin(); it.more(); ++it){
         auto dev = it.get();
-        if(supported_devices.contains(dev.devtype)){
-            it.get().flags = supported_devices[dev.devtype].flags;
-            it.get().layoutname = supported_devices[dev.devtype].layout;
-        }
-        LOG(dev.name << ": " << dev.version << " [" << dev.key << "]");
+        ArZ flags;
+        if(dev.flags & FLAG_BOOTLOADER) flags.push("BOOT");
+        if(dev.flags & FLAG_QMK) flags.push("QMK");
+        if(dev.flags & FLAG_SUPPORTED) flags.push("SUPPORT");
+        LOG(dev.name << ": " << dev.version <<
+            (flags.size() ? " (" + ZString::join(flags, ",") + ")" : "") <<
+            " [" << dev.key << "]");
     }
 
     LOG("<< Rescan Done");

@@ -8,6 +8,7 @@
 using namespace LibChaos;
 
 #include "pok3rtool/kbscan.h"
+#include "pok3rtool/keymap.h"
 
 enum KeyboardFlag {
     FLAG_NONE       = 0,
@@ -29,7 +30,7 @@ struct KeyboardDevice {
     ZString version;
     zu64 key;
     int flags;
-    ZString layoutname;
+    ZPointer<Keymap> keymap;
 };
 
 class MainWorker : public QObject {

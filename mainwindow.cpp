@@ -21,13 +21,34 @@ inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(bool devel, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     scanning(false),
     currcmd(CMD_NONE)
 {
     ui->setupUi(this);
+
+    // Store and remove tabs
+    QList<QWidget*> tabs;
+    QList<QString> tabnames;
+    int count = ui->tabWidget->count();
+    for(int i = count; i > 0; --i){
+        tabs.push_front(ui->tabWidget->widget(i-1));
+        tabnames.push_front(ui->tabWidget->tabText(i-1));
+        ui->tabWidget->removeTab(i-1);
+    }
+
+    // Re-add tabs
+    ui->tabWidget->addTab(tabs[0], tabnames[0]);
+    ui->tabWidget->addTab(tabs[1], tabnames[1]);
+    ui->tabWidget->addTab(tabs[2], tabnames[2]);
+    if(devel){
+        // Show commands tab in developer mode
+        ui->tabWidget->addTab(tabs[3], tabnames[3]);
+    }
+    ui->tabWidget->addTab(tabs[4], tabnames[4]);
+
 
     ui->version->setText("Version: " + QCoreApplication::applicationVersion());
     ui->tabWidget->setCurrentIndex(0);
@@ -38,55 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->keymap->setClearColor(Qt::transparent);
     // Needed to make the background transparent
     ui->keymap->setAttribute(Qt::WA_AlwaysStackOnTop, true);
-
-    // Load all keymaps
-    QDirIterator it(":/keymaps", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        QFile file(it.next());
-        if(!file.open(QIODevice::ReadOnly)){
-            LOG("Resource file error");
-            return;
-        }
-        QString data = file.readAll();
-        file.close();
-
-        KeymapConfig config;
-        try {
-            ZJSON json;
-            if(!json.decode(data.toStdString())){
-                LOG("JSON parse error");
-                return;
-            }
-
-            ZString name = json["name"].string();
-            int keycount = 0;
-            for(auto it = json["layout"].array().begin(); it.more(); ++it){
-                for(auto jt = it.get().array().begin(); jt.more(); ++jt){
-                    int width = jt.get().number();
-                    config.layout.append(width);
-                    if(width < 100)
-                        ++keycount;
-                }
-                config.layout.append(-1);
-            }
-
-            for(auto it = json["layers"].array().begin(); it.more(); ++it){
-                QList<QString> qlayer;
-                for(auto jt = it.get().array().begin(); jt.more(); ++jt){
-                    qlayer.append(toQStr(jt.get().string()));
-                }
-                if(qlayer.size() != keycount)
-                    throw ZException(ZString("Invalid layer keymap size: ") + qlayer.size());
-                config.layers.push(qlayer);
-            }
-
-            LOG("Keymap: " << name << ", " << keycount << " keys, " << config.layers.size() << " layers");
-
-            keymaps.add(name, config);
-        } catch(ZException e){
-            ELOG("Keymap error: " << e.what());
-        }
-    }
 }
 
 MainWindow::~MainWindow(){
@@ -100,6 +72,20 @@ void MainWindow::connectWorker(MainWorker *worker){
     connect(worker, SIGNAL(commandDone(bool)), this, SLOT(onCommandDone(bool)));
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event){
+//    auto list = ui->keymap->findChildren<KeymapButton *>();
+//    int width = event->size().width();
+//    int height = event->size().height();
+//    int width = ui->keymapContainer->size().width();
+//    int height = ui->keymapContainer->size().height();
+//    LOG("resize " << width << ", " << height);
+//    foreach(KeymapButton *w, list){
+//        w->forSize(width, height);
+//    }
+}
+
+// Command start/done
+
 void MainWindow::startCommand(KeyboardCommand cmd){
     int index = ui->keyboardSelect->currentIndex();
     if(index >= 0 && currcmd == CMD_NONE){
@@ -111,6 +97,44 @@ void MainWindow::startCommand(KeyboardCommand cmd){
 
         LOG("Command " << klist[index].name);
         emit kbCommand(klist[index].key, cmd);
+    }
+}
+
+void MainWindow::onCommandDone(bool ret){
+    ui->progressBar->setValue(100);
+    ui->progressBar->setMaximum(100);
+    ui->rebootButton->setEnabled(true);
+    ui->bootButton->setEnabled(true);
+    if(ret){
+        ui->statusBar->showMessage("Command Done");
+    }  else {
+        ui->statusBar->showMessage("Command Error");
+    }
+
+    KeyboardCommand cmd = currcmd;
+    currcmd = CMD_NONE;
+    if(cmd == CMD_REBOOT || cmd == CMD_BOOTLOADER){
+        on_rescanButton_clicked();
+    }
+}
+
+// Rescan start/done
+
+void MainWindow::on_rescanButton_clicked(){
+    if(!scanning){
+        scanning = true;
+        emit doRescan();
+        ui->rescanButton->setEnabled(false);
+        ui->progressBar->setMaximum(0);
+        ui->statusBar->showMessage("Scanning...");
+        ui->keyboardSelect->clear();
+        ui->keyboardSelect->setEnabled(false);
+        ui->flashButton->setEnabled(false);
+
+        ui->tabWidget->insertTab(0, ui->noTab, "No Keyboard");
+        ui->tabWidget->setCurrentIndex(0);
+        for(int i = 1; i < ui->tabWidget->count() - 1; ++i)
+            ui->tabWidget->setTabEnabled(i, false);
     }
 }
 
@@ -137,54 +161,6 @@ void MainWindow::onRescanDone(ZArray<KeyboardDevice> list){
     }
 }
 
-void MainWindow::onCommandDone(bool ret){
-    ui->progressBar->setValue(100);
-    ui->progressBar->setMaximum(100);
-    ui->rebootButton->setEnabled(true);
-    ui->bootButton->setEnabled(true);
-    if(ret){
-        ui->statusBar->showMessage("Command Done");
-    }  else {
-        ui->statusBar->showMessage("Command Error");
-    }
-
-//    KeyboardCommand cmd = currcmd;
-    currcmd = CMD_NONE;
-//    if(cmd == CMD_REBOOT || cmd == CMD_BOOTLOADER){
-//        on_rescanButton_clicked();
-    //    }
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event){
-//    auto list = ui->keymap->findChildren<KeymapButton *>();
-//    int width = event->size().width();
-//    int height = event->size().height();
-//    int width = ui->keymapContainer->size().width();
-//    int height = ui->keymapContainer->size().height();
-//    LOG("resize " << width << ", " << height);
-//    foreach(KeymapButton *w, list){
-//        w->forSize(width, height);
-//    }
-}
-
-void MainWindow::on_rescanButton_clicked(){
-    if(!scanning){
-        scanning = true;
-        emit doRescan();
-        ui->rescanButton->setEnabled(false);
-        ui->progressBar->setMaximum(0);
-        ui->statusBar->showMessage("Scanning...");
-        ui->keyboardSelect->clear();
-        ui->keyboardSelect->setEnabled(false);
-        ui->flashButton->setEnabled(false);
-
-        ui->tabWidget->insertTab(0, ui->noTab, "No Keyboard");
-        ui->tabWidget->setCurrentIndex(0);
-        for(int i = 1; i < ui->tabWidget->count() - 1; ++i)
-            ui->tabWidget->setTabEnabled(i, false);
-    }
-}
-
 void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
     if(index >= 0){
         ui->keyboardName->setText(toQStr("Keyboard name: " + klist[index].name));
@@ -198,11 +174,9 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
             ui->supported->setStyleSheet("QLabel { color: red; }");
             ui->flashButton->setEnabled(false);
         }
-        ZString layout = klist[index].layoutname;
-        if(keymaps.contains(layout)){
-            updateKeyLayout(index);
-        } else {
-            ELOG("Invalid layout " << layout);
+        if(klist[index].keymap.get()){
+            LOG("Layout: " << klist[index].keymap->layoutName());
+            updateKeyLayout(klist[index].keymap);
         }
     }
 }
@@ -237,37 +211,6 @@ void MainWindow::on_layerSelection_currentIndexChanged(int index)
     updateKeyLayer(index);
 }
 
-void MainWindow::updateKeyLayout(int index){
-    layoutIndex = index;
-    ZString layout = klist[index].layoutname;
-
-    QVariantList list;
-    for (auto item : keymaps[layout].layout) {
-        list << item;
-    }
-
-    QObject *obj = (QObject*) ui->keymap->rootObject();
-    QMetaObject::invokeMethod(obj, "setKeyLayout", Q_ARG(QVariant, list));
-    updateKeyLayer(0);
-
-    ui->layerSelection->clear();
-    for (int i = 0; i < keymaps[layout].layers.size(); ++i) {
-        ui->layerSelection->addItem(QString("Layer %1").arg(i + 1));
-    }
-}
-
-void MainWindow::updateKeyLayer(int index){
-    ZString layout = klist[layoutIndex].layoutname;
-
-    QVariantList list;
-    for (auto item : keymaps[layout].layers[index]) {
-        list << item;
-    }
-
-    QObject *obj = (QObject*) ui->keymap->rootObject();
-    QMetaObject::invokeMethod(obj, "updateLayer", Q_ARG(QVariant, list));
-}
-
 void MainWindow::customizeKey(int index){
    KeyCustomize *keyCustomize = new KeyCustomize(this);
    keyCustomize->show();
@@ -281,4 +224,38 @@ void MainWindow::updateRepr(int index, QString value){
     QMetaObject::invokeMethod(obj, "updateRepr",
                               Q_ARG(QVariant, index),
                               Q_ARG(QVariant, value));
+}
+
+void MainWindow::updateKeyLayout(ZPointer<Keymap> keymap){
+    LOG("updateLayout " << keymap->layoutName());
+    currentkeymap = keymap;
+
+    QVariantList list;
+    ZArray<int> layout = currentkeymap->getLayout();
+    for (auto it = layout.begin(); it.more(); ++it) {
+        list << it.get();
+    }
+
+    QObject *obj = (QObject*) ui->keymap->rootObject();
+    QMetaObject::invokeMethod(obj, "setKeyLayout", Q_ARG(QVariant, list));
+    updateKeyLayer(0);
+
+    ui->layerSelection->clear();
+    for (int i = 0; i < currentkeymap->numLayers(); ++i) {
+        ui->layerSelection->addItem(QString("Layer %1").arg(i));
+    }
+}
+
+void MainWindow::updateKeyLayer(int index){
+    LOG("updateLayer " << index);
+
+    QVariantList list;
+    //ZArray<int> layer = currentkeymap->getLayer(index);
+    ZArray<ZString> layer = currentkeymap->getLayerAbbrev(index);
+    for (auto it = layer.begin(); it.more(); ++it) {
+        list << toQStr(it.get());
+    }
+
+    QObject *obj = (QObject*) ui->keymap->rootObject();
+    QMetaObject::invokeMethod(obj, "updateLayer", Q_ARG(QVariant, list));
 }
