@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>759</width>
-    <height>531</height>
+    <width>814</width>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,7 +66,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="noTab">
        <attribute name="title">
@@ -229,7 +229,7 @@ p, li { white-space: pre-wrap; }
           <property name="title">
            <string>Layer</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
             <widget class="QComboBox" name="layerSelection">
              <property name="sizePolicy">
@@ -241,16 +241,20 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="newLayerButton">
-             <property name="text">
-              <string>New</string>
+            <widget class="QQuickWidget" name="keymap">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>Delete</string>
+             <property name="resizeMode">
+              <enum>QQuickWidget::SizeRootObjectToView</enum>
+             </property>
+             <property name="source">
+              <url>
+               <string>qrc:/keymap.qml</string>
+              </url>
              </property>
             </widget>
            </item>
@@ -258,20 +262,9 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QQuickWidget" name="keymap">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="resizeMode">
-           <enum>QQuickWidget::SizeRootObjectToView</enum>
-          </property>
-          <property name="source">
-           <url>
-            <string>qrc:/keymap.qml</string>
-           </url>
+         <widget class="QPushButton" name="commitButton">
+          <property name="text">
+           <string>Commit Keymap</string>
           </property>
          </widget>
         </item>
@@ -427,8 +420,8 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>759</width>
-     <height>30</height>
+     <width>814</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

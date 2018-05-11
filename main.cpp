@@ -29,6 +29,8 @@ int main(int argc, char *argv[]){
     ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
     ZLog::logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
 
+    DLOG("Pok3rConf: " _POK3RCONF_DESCRIBE);
+
     ZOptions options(optdef);
     if(!options.parse(argc, argv))
         return -2;
@@ -56,6 +58,7 @@ int main(int argc, char *argv[]){
     qRegisterMetaType<ZString>("ZString");
     qRegisterMetaType<ZArray<KeyboardDevice>>("ZArray<KeyboardDevice>");
     qRegisterMetaType<KeyboardCommand>("KeyboardCommand");
+    qRegisterMetaType<ZPointer<Keymap>>("ZPointer<Keymap>");
     window.connectWorker(&worker);
     // start scan when thread starts
     QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));

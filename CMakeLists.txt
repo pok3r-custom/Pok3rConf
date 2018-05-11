@@ -11,7 +11,7 @@ find_package(Qt5 COMPONENTS Core Quick Qml QuickWidgets Widgets REQUIRED)
 
 qt5_wrap_ui(UI_SRC
     mainwindow.ui
-    keycustomize.ui
+    editor/keycustomize.ui
 )
 
 qt5_add_resources(RC_SRC
@@ -31,6 +31,10 @@ set(SRC
 )
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
+
+GitDescribe("${CMAKE_CURRENT_SOURCE_DIR}" POK3RCONF_DESCRIBE)
+message(STATUS "Pok3rConf: ${POK3RCONF_DESCRIBE}")
+set_source_files_properties(main.cpp PROPERTIES COMPILE_DEFINITIONS _POK3RCONF_DESCRIBE="${POK3RCONF_DESCRIBE}")
 
 if(WIN32)
     add_executable(pok3rconf WIN32 ${SRC})

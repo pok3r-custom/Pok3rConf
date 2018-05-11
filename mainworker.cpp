@@ -1,4 +1,5 @@
 #include "mainworker.h"
+#include <QVariant>
 
 #include "pok3rtool/proto_pok3r.h"
 #include "pok3rtool/proto_cykb.h"
@@ -84,13 +85,16 @@ void MainWorker::onDoRescan(){
     emit rescanDone(list);
 }
 
-void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd){
+void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2){
     if(!kdevs.contains(key)){
+        ELOG("Command for bad keyboard");
         emit commandDone(false);
         return;
     }
     auto dev = kdevs[key];
     bool ret = false;
+
+    LOG("Command " << dev.info.name << ": " << cmd << " " << arg1.toString().toStdString() << " " << arg2.toString().toStdString());
 
     switch(cmd){
         case CMD_REBOOT:
@@ -99,9 +103,29 @@ void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd){
         case CMD_BOOTLOADER:
             ret = dev.iface->rebootBootloader(true);
             break;
+        case CMD_KM_COMMIT: {
+            zassert(dev.iface->isQMK(), "kb not qmk");
+            ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+            //ret = qmk->commitKeymap();
+            break;
+        }
         default:
             break;
     }
 
+    emit commandDone(ret);
+}
+
+void MainWorker::onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap){
+    if(!kdevs.contains(key)){
+        ELOG("Command for bad keyboard");
+        emit commandDone(false);
+        return;
+    }
+    auto dev = kdevs[key];
+
+    zassert(dev.iface->isQMK(), "kb not qmk");
+    ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+    bool ret = qmk->uploadKeymap(keymap);
     emit commandDone(ret);
 }

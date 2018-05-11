@@ -22,6 +22,8 @@ enum KeyboardCommand {
     CMD_ERROR,
     CMD_REBOOT,
     CMD_BOOTLOADER,
+    CMD_KM_SET,
+    CMD_KM_COMMIT,
 };
 
 struct KeyboardDevice {
@@ -44,7 +46,8 @@ signals:
 
 public slots:
     void onDoRescan();
-    void onKbCommand(zu64 key, KeyboardCommand cmd);
+    void onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2);
+    void onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap);
 
 private:
     ZMap<zu64, KBDevice> kdevs;

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "mainworker.h"
+#include "editor/keycustomize.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -28,13 +29,14 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 private:
-    void startCommand(KeyboardCommand cmd);
+    void startCommand(KeyboardCommand cmd, QVariant arg1 = QVariant(), QVariant arg2 = QVariant());
     void updateKeyLayout(ZPointer<Keymap> keymap);
     void updateKeyLayer(int index);
 
 signals:
     void doRescan();
-    void kbCommand(zu64 key, KeyboardCommand cmd);
+    void kbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2);
+    void kbKmUpdate(zu64 key, ZPointer<Keymap> keymap);
 
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
@@ -47,16 +49,19 @@ private slots:
     void on_uploadButton_clicked();
     void on_rebootButton_clicked();
     void on_bootButton_clicked();
+    void on_commitButton_clicked();
     void on_fileEdit_textChanged(const QString &arg1);
     void on_layerSelection_currentIndexChanged(int index);
     void updateRepr(int index, QString value);
 
 private:
     Ui::MainWindow *ui;
+    KeyCustomize *keyCustomize;
     bool scanning;
     ZArray<KeyboardDevice> klist;
     KeyboardCommand currcmd;
     QSettings settings;
+    int currentLayer;
     ZPointer<Keymap> currentkeymap;
 
     const QString CUSTOM_FIRMWARE_LOCATION = "customFirmwareLocation";
