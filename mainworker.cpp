@@ -7,6 +7,8 @@
 #include "pok3rtool/kbproto.h"
 #include "pok3rtool/kbscan.h"
 
+#include "gen_firmware.h"
+
 #include "zlog.h"
 #include "zmap.h"
 #include "zrandom.h"

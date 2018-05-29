@@ -30,7 +30,11 @@ set(SRC
     ${RC_SRC}
 )
 
-include_directories(${Qt5Widgets_INCLUDE_DIRS} ${QtQml_INCLUDE_DIRS})
+include_directories(
+    ${CMAKE_BINARY_DIR}
+    ${Qt5Widgets_INCLUDE_DIRS}
+    ${QtQml_INCLUDE_DIRS}
+)
 
 GitDescribe("${CMAKE_CURRENT_SOURCE_DIR}" POK3RCONF_DESCRIBE)
 message(STATUS "Pok3rConf: ${POK3RCONF_DESCRIBE}")
@@ -44,7 +48,10 @@ endif()
 #qt5_use_modules(pok3rconf Quick Core)
 target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets)
 
-# Copy shared libraries to build dir
+# install
+install(TARGETS pok3rconf DESTINATION bin)
+
+# copy shared libraries to build dir
 add_custom_command(TARGET pok3rconf POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:chaos-shared>"
@@ -74,30 +81,47 @@ endif()
 if(MINGW)
     # Apparently Qt's mingw doesn't come with some static libraries
     get_filename_component(MINGW_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
+    set(MINGW_LIBS_DIR "${MINGW_DIR}/../i686-w64-mingw32/lib")
+    set(MINGW_LIBGCC "${MINGW_LIBS_DIR}/libgcc_s_dw2-1.dll")
+    set(MINGW_LIBSTD "${MINGW_LIBS_DIR}/libstdc++-6.dll")
+    set(MINGW_LIBWPT "${MINGW_LIBS_DIR}/libwinpthread-1.dll")
+
     add_custom_command(TARGET pok3rconf POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${MINGW_DIR}/../i686-w64-mingw32/lib/libgcc_s_dw2-1.dll
+            "${MINGW_LIBGCC}"
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${MINGW_DIR}/../i686-w64-mingw32/lib/libstdc++-6.dll
+            "${MINGW_LIBSTD}"
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${MINGW_DIR}/../i686-w64-mingw32/lib/libwinpthread-1.dll
+            "${MINGW_LIBWPT}"
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()
 
+set(QMK_DIR "${CMAKE_SOURCE_DIR}/qmk_firmware")
+
 if(NOT WIN32)
-    add_custom_target(firmware
+    set(QMK_POK3R       "${QMK_DIR}/vortex_pok3r_chaos.bin")
+    set(QMK_POK3R_RGB   "${QMK_DIR}/vortex_pok3r_rgb_chaos.bin")
+    set(QMK_VORTEX_CORE "${QMK_DIR}/vortex_core_chaos.bin")
+
+    add_custom_target(firmware ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/qmk_firmware
         COMMAND make vortex/pok3r:chaos
         COMMAND make vortex/pok3r_rgb:chaos
         COMMAND make vortex/core:chaos
     )
+
+    # install firmware
+    install(FILES "${QMK_POK3R}"        DESTINATION share/pok3rconf)
+    install(FILES "${QMK_POK3R_RGB}"    DESTINATION share/pok3rconf)
+    install(FILES "${QMK_VORTEX_CORE}"  DESTINATION share/pok3rconf)
 endif()
 
-# install
-install(TARGETS pok3rconf DESTINATION bin)
+# generated header file
+GitDescribe("${QMK_DIR}" QMK_DESCRIBE)
+configure_file(gen_firmware.in.h gen_firmware.h)
 
 # uninstall target
 if(NOT TARGET uninstall)
