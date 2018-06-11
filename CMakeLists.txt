@@ -75,6 +75,15 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::Widgets>"
             "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:Qt5::Quick>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:Qt5::Qml>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:Qt5::QuickWidgets>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()
 
@@ -98,30 +107,6 @@ if(MINGW)
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()
-
-set(QMK_DIR "${CMAKE_SOURCE_DIR}/qmk_firmware")
-
-if(NOT WIN32)
-    set(QMK_POK3R       "${QMK_DIR}/vortex_pok3r_chaos.bin")
-    set(QMK_POK3R_RGB   "${QMK_DIR}/vortex_pok3r_rgb_chaos.bin")
-    set(QMK_VORTEX_CORE "${QMK_DIR}/vortex_core_chaos.bin")
-
-    add_custom_target(firmware ALL
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/qmk_firmware
-        COMMAND make vortex/pok3r:chaos
-        COMMAND make vortex/pok3r_rgb:chaos
-        COMMAND make vortex/core:chaos
-    )
-
-    # install firmware
-    install(FILES "${QMK_POK3R}"        DESTINATION share/pok3rconf)
-    install(FILES "${QMK_POK3R_RGB}"    DESTINATION share/pok3rconf)
-    install(FILES "${QMK_VORTEX_CORE}"  DESTINATION share/pok3rconf)
-endif()
-
-# generated header file
-GitDescribe("${QMK_DIR}" QMK_DESCRIBE)
-configure_file(gen_firmware.in.h gen_firmware.h)
 
 # uninstall target
 if(NOT TARGET uninstall)
