@@ -23,13 +23,17 @@ enum KeyboardCommand {
     CMD_REBOOT,
     CMD_BOOTLOADER,
     CMD_KM_SET,
-    CMD_KM_COMMIT,
+    CMD_KM_COMMIT,  //! Commit keymap to flash.
+    CMD_KM_RELOAD,  //! Reset to keymap stored in flash.
+    CMD_KM_RESET,   //! Reset to hardcoded default keymap.
 };
 
 struct KeyboardDevice {
     DeviceType devtype;
     ZString name;
     ZString version;
+    ZString kb_str;
+    ZString fw_str;
     zu64 key;
     int flags;
     ZPointer<Keymap> keymap;
@@ -42,7 +46,7 @@ public:
 
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
-    void commandDone(bool ret);
+    void commandDone(KeyboardCommand cmd, bool ret);
 
 public slots:
     void onDoRescan();

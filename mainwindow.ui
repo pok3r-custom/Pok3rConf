@@ -262,11 +262,29 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="commitButton">
-          <property name="text">
-           <string>Commit Keymap</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QPushButton" name="defaultButton">
+            <property name="text">
+             <string>Load Default Keymap</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="resetButton">
+            <property name="text">
+             <string>Reset Keymap</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="commitButton">
+            <property name="text">
+             <string>Commit Keymap</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -421,7 +439,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>814</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>

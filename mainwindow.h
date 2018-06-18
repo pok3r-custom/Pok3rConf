@@ -40,7 +40,7 @@ signals:
 
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
-    void onCommandDone(bool ret);
+    void onCommandDone(KeyboardCommand cmd, bool ret);
 
 private slots:
     void on_rescanButton_clicked();
@@ -50,6 +50,8 @@ private slots:
     void on_rebootButton_clicked();
     void on_bootButton_clicked();
     void on_commitButton_clicked();
+    void on_resetButton_clicked();
+    void on_defaultButton_clicked();
     void on_fileEdit_textChanged(const QString &arg1);
     void on_layerSelection_currentIndexChanged(int index);
     void updateRepr(int index, QString value);

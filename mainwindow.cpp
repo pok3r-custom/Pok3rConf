@@ -80,7 +80,7 @@ void MainWindow::connectWorker(MainWorker *worker){
     connect(worker, SIGNAL(rescanDone(ZArray<KeyboardDevice>)), this, SLOT(onRescanDone(ZArray<KeyboardDevice>)));
     connect(this, SIGNAL(kbCommand(zu64,KeyboardCommand,QVariant,QVariant)), worker, SLOT(onKbCommand(zu64,KeyboardCommand,QVariant,QVariant)));
     connect(this, SIGNAL(kbKmUpdate(zu64,ZPointer<Keymap>)), worker, SLOT(onKbKmUpdate(zu64,ZPointer<Keymap>)));
-    connect(worker, SIGNAL(commandDone(bool)), this, SLOT(onCommandDone(bool)));
+    connect(worker, SIGNAL(commandDone(KeyboardCommand,bool)), this, SLOT(onCommandDone(KeyboardCommand,bool)));
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event){
@@ -113,7 +113,9 @@ void MainWindow::startCommand(KeyboardCommand cmd, QVariant arg1, QVariant arg2)
     }
 }
 
-void MainWindow::onCommandDone(bool ret){
+void MainWindow::onCommandDone(KeyboardCommand cmd, bool ret){
+    currcmd = CMD_NONE;
+
     ui->progressBar->setValue(100);
     ui->progressBar->setMaximum(100);
     ui->rebootButton->setEnabled(true);
@@ -124,10 +126,10 @@ void MainWindow::onCommandDone(bool ret){
         ui->statusBar->showMessage("Error");
     }
 
-    KeyboardCommand cmd = currcmd;
-    currcmd = CMD_NONE;
     if(cmd == CMD_REBOOT || cmd == CMD_BOOTLOADER){
         on_rescanButton_clicked();
+    } else if(cmd == CMD_KM_RELOAD || cmd == CMD_KM_RESET){
+
     }
 }
 
@@ -177,8 +179,8 @@ void MainWindow::onRescanDone(ZArray<KeyboardDevice> list){
 void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
     // Change selected keyboard
     if(index >= 0){
-        ui->keyboardName->setText(toQStr("Keyboard name: " + klist[index].name));
-        ui->firmwareVersion->setText(toQStr("Keyboard version: " + klist[index].version));
+        ui->keyboardName->setText(toQStr("Keyboard: " + klist[index].name));
+        ui->firmwareVersion->setText(toQStr("Firmware: " + klist[index].version));
         if(klist[index].flags & FLAG_SUPPORTED){
             ui->supported->setText("This keyboard is supported");
             ui->supported->setStyleSheet("QLabel { color: green; }");
@@ -220,6 +222,14 @@ void MainWindow::on_bootButton_clicked(){
 
 void MainWindow::on_commitButton_clicked(){
     startCommand(CMD_KM_COMMIT);
+}
+
+void MainWindow::on_resetButton_clicked(){
+    startCommand(CMD_KM_RELOAD);
+}
+
+void MainWindow::on_defaultButton_clicked(){
+    startCommand(CMD_KM_RESET);
 }
 
 void MainWindow::on_fileEdit_textChanged(const QString &arg1){

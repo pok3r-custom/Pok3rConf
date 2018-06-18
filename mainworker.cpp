@@ -63,11 +63,27 @@ void MainWorker::onDoRescan(){
 
         zu64 key = random.genzu();
         kdevs.add(key, dev);
-        list.push({ dev.devtype, dev.info.name, version, key, flags, km });
+        KeyboardDevice kbdev = {
+            .devtype = dev.devtype,
+            .name = dev.info.name,
+            .version = version,
+            .key = key,
+            .flags = flags,
+            .keymap = km,
+        };
+        list.push(kbdev);
     }
 
     if(fake){
-        list.push({ DEV_POK3R, "Fake Pok3r", "N/A", 0, FLAG_NONE, nullptr });
+        KeyboardDevice kbdev = {
+            .devtype = DEV_POK3R,
+            .name = "Fake Pok3r",
+            .version = "N/A",
+            .key = 0,
+            .flags = FLAG_NONE,
+            .keymap = nullptr,
+        };
+        list.push(kbdev);
     }
 
     for(auto it = list.begin(); it.more(); ++it){
@@ -88,7 +104,7 @@ void MainWorker::onDoRescan(){
 void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2){
     if(!kdevs.contains(key)){
         ELOG("Command for bad keyboard");
-        emit commandDone(false);
+        emit commandDone(cmd, false);
         return;
     }
     auto dev = kdevs[key];
@@ -106,20 +122,32 @@ void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVari
         case CMD_KM_COMMIT: {
             zassert(dev.iface->isQMK(), "kb not qmk");
             ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
-            //ret = qmk->commitKeymap();
+            ret = qmk->commitKeymap();
+            break;
+        }
+        case CMD_KM_RELOAD: {
+            zassert(dev.iface->isQMK(), "kb not qmk");
+            ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+            ret = qmk->reloadKeymap();
+            break;
+        }
+        case CMD_KM_RESET: {
+            zassert(dev.iface->isQMK(), "kb not qmk");
+            ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+            ret = qmk->resetKeymap();
             break;
         }
         default:
             break;
     }
 
-    emit commandDone(ret);
+    emit commandDone(cmd, ret);
 }
 
 void MainWorker::onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap){
     if(!kdevs.contains(key)){
         ELOG("Command for bad keyboard");
-        emit commandDone(false);
+        emit commandDone(CMD_KM_SET, false);
         return;
     }
     auto dev = kdevs[key];
@@ -127,5 +155,5 @@ void MainWorker::onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap){
     zassert(dev.iface->isQMK(), "kb not qmk");
     ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
     bool ret = qmk->uploadKeymap(keymap);
-    emit commandDone(ret);
+    emit commandDone(CMD_KM_SET, ret);
 }
