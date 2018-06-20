@@ -10,7 +10,7 @@ pok3rconf:linux:
     - linux
   image: fedora
   before_script:
-    - dnf install -y gcc gcc-c++ cmake make openssl-devel libusb-devel qt5-qtbase-devel
+    - dnf install -y gcc gcc-c++ cmake make openssl-devel libusb-devel qt5-qtbase-devel qt5-qtquickcontrols2-devel
   script:
     - mkdir build
     - cd build
@@ -35,7 +35,7 @@ test:linux:
     - linux
   image: fedora
   before_script:
-    - dnf install -y libstdc++ openssl libusb qt5-qtbase
+    - dnf install -y libstdc++ openssl libusb qt5-qtbase qt5-qtquickcontrols2
   script:
     - cd build/pok3rtool
     - ./pok3rtool list
