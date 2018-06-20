@@ -62,6 +62,7 @@ int main(int argc, char *argv[]){
     window.connectWorker(&worker);
     // start scan when thread starts
     QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));
+    QObject::connect(&thread, SIGNAL(started()), &worker, SLOT(onStartup()));
 
     // start thread
     worker.moveToThread(&thread);

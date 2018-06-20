@@ -7,7 +7,7 @@ add_subdirectory(pok3rtool)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt5 COMPONENTS Core Quick Qml QuickWidgets Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Qml QuickWidgets Widgets Network REQUIRED)
 
 qt5_wrap_ui(UI_SRC
     mainwindow.ui
@@ -46,7 +46,7 @@ else()
     add_executable(pok3rconf ${SRC})
 endif()
 #qt5_use_modules(pok3rconf Quick Core)
-target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets)
+target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
 
 # install
 install(TARGETS pok3rconf DESTINATION bin)
@@ -83,6 +83,9 @@ if(WIN32)
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::QuickWidgets>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:Qt5::Network>"
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()

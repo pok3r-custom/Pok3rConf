@@ -2,6 +2,8 @@
 #define MAINWORKER_H
 
 #include <QObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include "zstring.h"
 #include "zmap.h"
@@ -31,9 +33,9 @@ enum KeyboardCommand {
 struct KeyboardDevice {
     DeviceType devtype;
     ZString name;
-    ZString version;
-    ZString kb_str;
+    ZString slug;
     ZString fw_str;
+    ZString version;
     zu64 key;
     int flags;
     ZPointer<Keymap> keymap;
@@ -44,18 +46,27 @@ class MainWorker : public QObject {
 public:
     explicit MainWorker(bool fake, QObject *parent = nullptr);
 
+private:
+    void startDownload(QUrl url);
+
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
     void commandDone(KeyboardCommand cmd, bool ret);
 
 public slots:
+    void onStartup();
     void onDoRescan();
     void onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2);
     void onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap);
 
+private slots:
+    void downloadFinished();
+
 private:
     ZMap<zu64, KBDevice> kdevs;
     bool fake;
+    QNetworkAccessManager *netmgr;
+    QNetworkReply *reply;
 };
 
 #endif // MAINWORKER_H
