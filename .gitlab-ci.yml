@@ -28,7 +28,7 @@ pok3rconf:linux:
 test:linux:
   stage: test
   dependencies:
-    - pok3rtool:linux
+    - pok3rconf:linux
   variables:
     GIT_STRATEGY: none
   tags:
