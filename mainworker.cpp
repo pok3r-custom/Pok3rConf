@@ -98,28 +98,26 @@ void MainWorker::onDoRescan(){
 
         zu64 key = random.genzu();
         kdevs.add(key, dev);
-        KeyboardDevice kbdev = {
-            .devtype = dev.devtype,
-            .name = dev.info.name,
-            .slug = dev.info.slug,
-            .version = version,
-            .key = key,
-            .flags = flags,
-            .keymap = km,
-        };
+        KeyboardDevice kbdev;
+        kbdev.devtype = dev.devtype,
+        kbdev.name = dev.info.name,
+        kbdev.slug = dev.info.slug,
+        kbdev.version = version,
+        kbdev.key = key,
+        kbdev.flags = flags,
+        kbdev.keymap = km,
         list.push(kbdev);
     }
 
     if(fake){
-        KeyboardDevice kbdev = {
-            .devtype = DEV_POK3R,
-            .name = "Fake Pok3r",
-            .slug = "vortex/pok3r",
-            .version = "N/A",
-            .key = 0,
-            .flags = FLAG_NONE,
-            .keymap = nullptr,
-        };
+        KeyboardDevice kbdev;
+        kbdev.devtype = DEV_POK3R,
+        kbdev.name = "Fake Pok3r",
+        kbdev.slug = "vortex/pok3r",
+        kbdev.version = "N/A",
+        kbdev.key = 0,
+        kbdev.flags = FLAG_NONE,
+        kbdev.keymap = nullptr,
         list.push(kbdev);
     }
 
