@@ -8,6 +8,8 @@
 
 #include "zstring.h"
 #include "zmap.h"
+#include "zqueue.h"
+#include "zfile.h"
 using namespace LibChaos;
 
 #include "pok3rtool/kbscan.h"
@@ -48,6 +50,7 @@ public:
     explicit MainWorker(bool fake, QObject *parent = nullptr);
 
 private:
+    void downloadFile(ZString name);
     void startDownload(QUrl url);
 
 signals:
@@ -62,12 +65,20 @@ public slots:
 
 private slots:
     void downloadFinished();
+    void downloadReadyRead();
 
 private:
     ZMap<zu64, KBDevice> kdevs;
     bool fake;
     QNetworkAccessManager *netmgr;
     QNetworkReply *reply;
+    ZPath app_dir;
+    ZFile dlfile;
+    zsize fw_i;
+    ZQueue<ZString> dl_files;
+    ZQueue<ZBinary> dl_sums;
+    ZHash<ZBinary, ZHashBase::MD5> *dl_hash;
+    ZMap<DeviceType, int> known_devices;
 };
 
 #endif // MAINWORKER_H

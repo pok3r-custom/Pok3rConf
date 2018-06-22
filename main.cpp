@@ -45,8 +45,8 @@ int main(int argc, char *argv[]){
 
     QApplication app(argc, argv);
 
-    QApplication::setOrganizationName("zennix");
-    QApplication::setApplicationName("Pok3rConf");
+    QApplication::setOrganizationName("pok3r-custom");
+    QApplication::setApplicationName("pok3rconf");
     QApplication::setApplicationVersion("0.1");
 
     MainWindow window(options.getOpts().contains(OPT_DEVEL));

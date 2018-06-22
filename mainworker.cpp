@@ -2,6 +2,7 @@
 #include <QVariant>
 #include <QNetworkRequest>
 #include <QUrl>
+#include <QStandardPaths>
 
 #if !QT_CONFIG(ssl)
     #error "Need QNetwork SSL"
@@ -16,50 +17,128 @@
 #include "zlog.h"
 #include "zmap.h"
 #include "zrandom.h"
+#include "zpath.h"
 
-const ZMap<DeviceType, int> known_devices = {
-    { DEV_POK3R,        FLAG_SUPPORTED },
-    { DEV_POK3R_RGB,    FLAG_NONE },
-    { DEV_POK3R_RGB2,   FLAG_NONE },
-    { DEV_KBP_V60,      FLAG_NONE },
-    { DEV_KBP_V80,      FLAG_NONE },
-};
+//#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/raw/"
+#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/releases/raw/"
+#define FW_FETCH_SUFFIX "?job=qmk_pok3r"
+#define FW_SUMS_FILE    "qmk_pok3r.md5"
+
+#define FW_INFO_OFFSET  0x160
+#define FW_INFO_SIZE    0x80
 
 inline QString toQStr(ZString str){
     return QString::fromUtf8(str.raw(), str.size());
 }
 
-MainWorker::MainWorker(bool f, QObject *parent) : QObject(parent), fake(f){
+MainWorker::MainWorker(bool f, QObject *parent) : QObject(parent), fake(f),
+    netmgr(nullptr), reply(nullptr), dlfile(nullptr), fw_i(0)
+{
+    app_dir = ZString(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString());
+}
 
+void MainWorker::onStartup(){
+    // we need to create this object in the worker thread
+    netmgr = new QNetworkAccessManager;
+    connect(this, SIGNAL(destroyed()), netmgr, SLOT(deleteLater()));
+
+    // check for latest firmware
+    downloadFile(FW_SUMS_FILE);
+}
+
+void MainWorker::downloadFile(ZString name){
+    QUrl url = toQStr(FW_FETCH_URL + name + FW_FETCH_SUFFIX);
+    ZPath file = app_dir + name;
+
+    DLOG("Download " << url.toString().toStdString() << " -> " << file);
+
+    if(!ZFile::createDirsTo(file)){
+        ELOG("Failed to create dirs");
+        return;
+    }
+    if(!dlfile.open(file, ZFile::READWRITE)){
+        ELOG("Failed to open file for writing");
+        return;
+    }
+
+    startDownload(url);
 }
 
 void MainWorker::startDownload(QUrl url){
-    DLOG("Download " << url.toString().toStdString());
+    dl_hash = new ZHash<ZBinary, ZHashBase::MD5>;
     reply = netmgr->get(QNetworkRequest(url));
-    connect(reply, &QNetworkReply::finished, this, &MainWorker::downloadFinished);
+    connect(this, SIGNAL(destroyed()), reply, SLOT(deleteLater()));
+    connect(reply, SIGNAL(readyRead()), this, SLOT(downloadReadyRead()));
+    connect(reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
+}
+
+void MainWorker::downloadReadyRead(){
+    QByteArray dat = reply->readAll();
+    ZBinary data(dat.data(), dat.size());
+    dl_hash->feed(data);
+    if(dlfile.write(data) != data.size()){
+        ELOG("Failed to write");
+    }
 }
 
 void MainWorker::downloadFinished(){
     if(reply->error()){
         LOG("HTTP error");
-    } else {
-        LOG("OK " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() <<
-            " " << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString().toStdString());
-        QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-        if(!redirect.isNull()){
-            QUrl url = redirect.toUrl();
-            DLOG("Redirect " << url.toString().toStdString());
-            startDownload(url);
-        }
+        return;
     }
-}
 
-void MainWorker::onStartup(){
-    netmgr = new QNetworkAccessManager;
+    DLOG("HTTP OK " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() <<
+        " " << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString().toStdString());
+    QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    if(!redirect.isNull()){
+        QUrl url = redirect.toUrl();
+        dlfile.rewind();
+        dlfile.resizeFile(0);
+        delete dl_hash;
+        DLOG("Redirect " << url.toString().toStdString());
+        startDownload(url);
+        return;
+    }
 
-    // check for latest qmk firmware
-    QUrl url = QString("https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/download?job=qmk_pok3r");
-    startDownload(url);
+    ZPath path = dlfile.path();
+    LOG("Done " << path);
+    ZString ext = path.getExtension();
+    if(ext == ".md5"){
+        dlfile.close();
+        delete dl_hash;
+        ZString sums = ZFile::readString(path);
+        ArZ lines = sums.strExplode("\n");
+        for(auto it = lines.begin(); it.more(); ++it){
+            ArZ sp = it.get().strip('\r').explode(' ');
+            zassert(sp.size() == 2);
+            //LOG(sp[1] << " = " << sp[0]);
+            dl_files.push(sp[1]);
+            dl_sums.push(ZBinary::fromHex(sp[0]));
+        }
+
+    } else if(ext == ".bin"){
+        dl_hash->finish();
+        ZBinary md5 = dl_hash->hash();
+        delete dl_hash;
+        if(md5 != dl_sums.peek()){
+            ELOG("Invalid firmware " << md5 << " " << dl_sums.peek());
+        } else {
+            ZBinary info;
+            if( (dlfile.seek(FW_INFO_OFFSET) != FW_INFO_OFFSET) ||
+                    (dlfile.read(info, FW_INFO_SIZE) != FW_INFO_SIZE)){
+                ELOG("File read error");
+            }
+            dlfile.close();
+            ZString info_str(info.raw(), info.size());
+            LOG(info_str);
+        }
+        dl_sums.pop();
+    }
+
+    if(!dl_files.isEmpty()){
+        downloadFile(dl_files.peek());
+        dl_files.pop();
+    }
 }
 
 void MainWorker::onDoRescan(){
