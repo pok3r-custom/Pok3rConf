@@ -1,11 +1,11 @@
 #include "mainworker.h"
 #include <QVariant>
-#include <QNetworkRequest>
-#include <QUrl>
+//#include <QNetworkRequest>
+//#include <QUrl>
 
-#if !QT_CONFIG(ssl)
-    #error "Need QNetwork SSL"
-#endif
+//#if !QT_CONFIG(ssl)
+//    #error "Need QNetwork SSL"
+//#endif
 
 #include "pok3rtool/proto_pok3r.h"
 #include "pok3rtool/proto_cykb.h"
@@ -34,32 +34,32 @@ MainWorker::MainWorker(bool f, QObject *parent) : QObject(parent), fake(f){
 }
 
 void MainWorker::startDownload(QUrl url){
-    DLOG("Download " << url.toString().toStdString());
-    reply = netmgr->get(QNetworkRequest(url));
-    connect(reply, &QNetworkReply::finished, this, &MainWorker::downloadFinished);
+//    DLOG("Download " << url.toString().toStdString());
+//    reply = netmgr->get(QNetworkRequest(url));
+//    connect(reply, &QNetworkReply::finished, this, &MainWorker::downloadFinished);
 }
 
 void MainWorker::downloadFinished(){
-    if(reply->error()){
-        LOG("HTTP error");
-    } else {
-        LOG("OK " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() <<
-            " " << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString().toStdString());
-        QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-        if(!redirect.isNull()){
-            QUrl url = redirect.toUrl();
-            DLOG("Redirect " << url.toString().toStdString());
-            startDownload(url);
-        }
-    }
+//    if(reply->error()){
+//        LOG("HTTP error");
+//    } else {
+//        LOG("OK " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() <<
+//            " " << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString().toStdString());
+//        QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+//        if(!redirect.isNull()){
+//            QUrl url = redirect.toUrl();
+//            DLOG("Redirect " << url.toString().toStdString());
+//            startDownload(url);
+//        }
+//    }
 }
 
 void MainWorker::onStartup(){
-    netmgr = new QNetworkAccessManager;
+//    netmgr = new QNetworkAccessManager;
 
-    // check for latest qmk firmware
-    QUrl url = QString("https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/download?job=qmk_pok3r");
-    startDownload(url);
+//    // check for latest qmk firmware
+//    QUrl url = QString("https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/download?job=qmk_pok3r");
+//    startDownload(url);
 }
 
 void MainWorker::onDoRescan(){
