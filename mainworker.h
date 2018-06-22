@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QUrl>
-//#include <QNetworkAccessManager>
-//#include <QNetworkReply>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include "zstring.h"
 #include "zmap.h"
@@ -66,8 +66,8 @@ private slots:
 private:
     ZMap<zu64, KBDevice> kdevs;
     bool fake;
-//    QNetworkAccessManager *netmgr;
-//    QNetworkReply *reply;
+    QNetworkAccessManager *netmgr;
+    QNetworkReply *reply;
 };
 
 #endif // MAINWORKER_H
