@@ -59,10 +59,20 @@ int main(int argc, char *argv[]){
     qRegisterMetaType<ZArray<KeyboardDevice>>("ZArray<KeyboardDevice>");
     qRegisterMetaType<KeyboardCommand>("KeyboardCommand");
     qRegisterMetaType<ZPointer<Keymap>>("ZPointer<Keymap>");
-    window.connectWorker(&worker);
+
+    // connect worker and window
+    QObject::connect(&window, SIGNAL(doRescan()), &worker, SLOT(onDoRescan()));
+    QObject::connect(&worker, SIGNAL(rescanDone(ZArray<KeyboardDevice>)), &window, SLOT(onRescanDone(ZArray<KeyboardDevice>)));
+    QObject::connect(&window, SIGNAL(kbCommand(zu64,KeyboardCommand,QVariant,QVariant)), &worker, SLOT(onKbCommand(zu64,KeyboardCommand,QVariant,QVariant)));
+    QObject::connect(&window, SIGNAL(kbKmUpdate(zu64,ZPointer<Keymap>)), &worker, SLOT(onKbKmUpdate(zu64,ZPointer<Keymap>)));
+    QObject::connect(&worker, SIGNAL(commandDone(KeyboardCommand,bool)), &window, SLOT(onCommandDone(KeyboardCommand,bool)));
+    QObject::connect(&worker, SIGNAL(statusUpdate(ZString)), &window, SLOT(onStatusUpdate(ZString)));
+    QObject::connect(&worker, SIGNAL(progressUpdate(int,int)), &window, SLOT(onProgressUpdate(int,int)));
+    QObject::connect(&worker, SIGNAL(checkedForUpdate()), &window, SLOT(on_rescanButton_clicked()));
+
     // start scan when thread starts
-    QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));
     QObject::connect(&thread, SIGNAL(started()), &worker, SLOT(onStartup()));
+    //QObject::connect(&thread, SIGNAL(started()), &window, SLOT(on_rescanButton_clicked()));
 
     // start thread
     worker.moveToThread(&thread);

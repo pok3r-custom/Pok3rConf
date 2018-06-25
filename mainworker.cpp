@@ -24,6 +24,8 @@
 #define FW_FETCH_SUFFIX "?job=qmk_pok3r"
 #define FW_SUMS_FILE    "qmk_pok3r.md5"
 
+#define FW_TAGS_URL     "https://gitlab.com/api/v4/projects/6944784/repository/tags"
+
 #define FW_INFO_OFFSET  0x160
 #define FW_INFO_SIZE    0x80
 
@@ -43,25 +45,27 @@ void MainWorker::onStartup(){
     connect(this, SIGNAL(destroyed()), netmgr, SLOT(deleteLater()));
 
     // check for latest firmware
-    downloadFile(FW_SUMS_FILE);
+    emit statusUpdate("Checking for Firmware Update");
+    emit progressUpdate(0, 0);
+    //downloadFile(FW_FETCH_URL FW_SUMS_FILE FW_FETCH_SUFFIX, FW_SUMS_FILE);
+    downloadFile(FW_TAGS_URL, "tags");
 }
 
-void MainWorker::downloadFile(ZString name){
-    QUrl url = toQStr(FW_FETCH_URL + name + FW_FETCH_SUFFIX);
-    ZPath file = app_dir + name;
+void MainWorker::downloadFile(ZString url, ZString fname){
+    ZPath file = app_dir + fname;
 
-    DLOG("Download " << url.toString().toStdString() << " -> " << file);
+    DLOG("Download " << url << " -> " << file);
 
     if(!ZFile::createDirsTo(file)){
         ELOG("Failed to create dirs");
         return;
     }
-    if(!dlfile.open(file, ZFile::READWRITE)){
+    if(!dlfile.open(file, ZFile::READWRITE | ZFile::TRUNCATE)){
         ELOG("Failed to open file for writing");
         return;
     }
 
-    startDownload(url);
+    startDownload(toQStr(url));
 }
 
 void MainWorker::startDownload(QUrl url){
@@ -84,6 +88,8 @@ void MainWorker::downloadReadyRead(){
 void MainWorker::downloadFinished(){
     if(reply->error()){
         LOG("HTTP error");
+        emit statusUpdate("Download Failed");
+        emit progressUpdate(0, 100);
         return;
     }
 
@@ -112,32 +118,47 @@ void MainWorker::downloadFinished(){
             ArZ sp = it.get().strip('\r').explode(' ');
             zassert(sp.size() == 2);
             //LOG(sp[1] << " = " << sp[0]);
-            dl_files.push(sp[1]);
-            dl_sums.push(ZBinary::fromHex(sp[0]));
+            KeyboardFirmware fw;
+            fw.file = sp[1];
+            fw.md5 = ZBinary::fromHex(sp[0]);
+            fw.ok = false;
+            kb_fw.push(fw);
         }
+        fw_i = 0;
+        emit progressUpdate(fw_i, kb_fw.size());
 
     } else if(ext == ".bin"){
         dl_hash->finish();
         ZBinary md5 = dl_hash->hash();
         delete dl_hash;
-        if(md5 != dl_sums.peek()){
-            ELOG("Invalid firmware " << md5 << " " << dl_sums.peek());
+        if(md5 != kb_fw[fw_i].md5){
+            ELOG("Invalid firmware " << md5 << " " << kb_fw[fw_i].md5);
         } else {
-            ZBinary info;
+            ZBinary info_bin;
             if( (dlfile.seek(FW_INFO_OFFSET) != FW_INFO_OFFSET) ||
-                    (dlfile.read(info, FW_INFO_SIZE) != FW_INFO_SIZE)){
+                    (dlfile.read(info_bin, FW_INFO_SIZE) != FW_INFO_SIZE)){
                 ELOG("File read error");
             }
             dlfile.close();
-            ZString info_str(info.raw(), info.size());
-            LOG(info_str);
+            ZString info_str(info_bin.raw(), info_bin.size());
+            ArZ info = info_str.explode(';');
+            if(info.size() == 4){
+                kb_fw[fw_i].ok = true;
+                kb_fw[fw_i].slug = info[1];
+                kb_fw[fw_i].version = info[2];
+            } else {
+                ELOG("Invalid firmware info");
+            }
         }
-        dl_sums.pop();
+        emit progressUpdate(++fw_i, -1);
     }
 
-    if(!dl_files.isEmpty()){
-        downloadFile(dl_files.peek());
-        dl_files.pop();
+    if(fw_i < kb_fw.size()){
+        emit statusUpdate("Downloading " + kb_fw[fw_i].file);
+        downloadFile(FW_FETCH_URL + kb_fw[fw_i].file + FW_FETCH_SUFFIX, kb_fw[fw_i].file);
+    } else {
+        emit statusUpdate("Fetched Firmware");
+        emit checkedForUpdate();
     }
 }
 
@@ -154,34 +175,50 @@ void MainWorker::onDoRescan(){
     auto devs = scanner.open();
     for(auto it = devs.begin(); it.more(); ++it){
         auto dev = it.get();
-        ZString version = dev.iface->getVersion();
         int flags = FLAG_NONE;
+        ZString ver_str = dev.iface->getVersion();
+        ZString fw_str;
+        ZPointer<Keymap> km;
+        ZString version = ver_str;
 
         if(dev.iface->isBuiltin()){
             flags |= FLAG_BOOTLOADER;
-        }
-
-        ZPointer<Keymap> km;
-        if(dev.iface->isQMK()){
+            fw_str = "Stock Bootloader";
+        } else if(dev.iface->isQMK()){
             ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+            ZString qmk_ver = qmk->qmkVersion();
+            version = qmk_ver;
             km = qmk->loadKeymap();
             if(!km.get()){
                 ELOG("Failed to load keymap");
             }
             flags |= FLAG_QMK;
+            fw_str = "qmk_pok3r " + qmk_ver;
+        } else {
+            fw_str = "Vortex Firmware " + ver_str;
         }
 
         if(known_devices.contains(dev.devtype)){
             flags |= known_devices[dev.devtype];
         }
 
+        for(auto it = kb_fw.cbegin(); it.more(); ++it){
+            if(it.get().ok && it.get().slug == dev.info.slug){
+                if(it.get().version != version){
+                    LOG("Firmware Update " << version << " -> " << it.get().version << " for " << dev.info.slug);
+                }
+            }
+        }
+
         zu64 key = random.genzu();
         kdevs.add(key, dev);
+
         KeyboardDevice kbdev;
         kbdev.devtype = dev.devtype,
         kbdev.name = dev.info.name,
         kbdev.slug = dev.info.slug,
-        kbdev.version = version,
+        kbdev.version = ver_str,
+        kbdev.fw_str = fw_str;
         kbdev.key = key,
         kbdev.flags = flags,
         kbdev.keymap = km,
@@ -194,6 +231,7 @@ void MainWorker::onDoRescan(){
         kbdev.name = "Fake Pok3r",
         kbdev.slug = "vortex/pok3r",
         kbdev.version = "N/A",
+        kbdev.fw_str = "Fake Firmware v0.0";
         kbdev.key = 0,
         kbdev.flags = FLAG_NONE,
         kbdev.keymap = nullptr,
@@ -208,6 +246,7 @@ void MainWorker::onDoRescan(){
         if(dev.flags & FLAG_SUPPORTED) flags.push("SUPPORT");
         LOG(dev.name << ": " << dev.version <<
             (flags.size() ? " (" + ZString::join(flags, ",") + ")" : "") <<
+            " {" << dev.slug << "}" <<
             " [" << dev.key << "]");
     }
 

@@ -37,11 +37,19 @@ struct KeyboardDevice {
     DeviceType devtype;
     ZString name;
     ZString slug;
-    ZString fw_str;
     ZString version;
+    ZString fw_str;
     zu64 key;
     int flags;
     ZPointer<Keymap> keymap;
+};
+
+struct KeyboardFirmware {
+    ZString file;
+    ZBinary md5;
+    bool ok;
+    ZString slug;
+    ZString version;
 };
 
 class MainWorker : public QObject {
@@ -50,12 +58,15 @@ public:
     explicit MainWorker(bool fake, QObject *parent = nullptr);
 
 private:
-    void downloadFile(ZString name);
+    void downloadFile(ZString url, ZString name);
     void startDownload(QUrl url);
 
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
     void commandDone(KeyboardCommand cmd, bool ret);
+    void statusUpdate(ZString status);
+    void progressUpdate(int val, int max);
+    void checkedForUpdate();
 
 public slots:
     void onStartup();
@@ -74,9 +85,8 @@ private:
     QNetworkReply *reply;
     ZPath app_dir;
     ZFile dlfile;
-    zsize fw_i;
-    ZQueue<ZString> dl_files;
-    ZQueue<ZBinary> dl_sums;
+    ZArray<KeyboardFirmware> kb_fw;
+    int fw_i;
     ZHash<ZBinary, ZHashBase::MD5> *dl_hash;
     ZMap<DeviceType, int> known_devices;
 };

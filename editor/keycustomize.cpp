@@ -32,6 +32,8 @@ KeyCustomize::KeyCustomize(QWidget *parent) :
 }
 
 KeyCustomize::~KeyCustomize(){
+    delete proxy;
+    delete model;
     delete ui;
 }
 

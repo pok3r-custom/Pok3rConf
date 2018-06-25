@@ -75,18 +75,6 @@ MainWindow::~MainWindow(){
     delete ui;
 }
 
-void MainWindow::connectWorker(MainWorker *worker){
-    connect(this, SIGNAL(doRescan()), worker, SLOT(onDoRescan()));
-    connect(worker, SIGNAL(rescanDone(ZArray<KeyboardDevice>)), this, SLOT(onRescanDone(ZArray<KeyboardDevice>)));
-    connect(this, SIGNAL(kbCommand(zu64,KeyboardCommand,QVariant,QVariant)), worker, SLOT(onKbCommand(zu64,KeyboardCommand,QVariant,QVariant)));
-    connect(this, SIGNAL(kbKmUpdate(zu64,ZPointer<Keymap>)), worker, SLOT(onKbKmUpdate(zu64,ZPointer<Keymap>)));
-    connect(worker, SIGNAL(commandDone(KeyboardCommand,bool)), this, SLOT(onCommandDone(KeyboardCommand,bool)));
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event){
-
-}
-
 // Command start/done
 
 void MainWindow::startCommand(KeyboardCommand cmd, QVariant arg1, QVariant arg2){
@@ -133,6 +121,16 @@ void MainWindow::onCommandDone(KeyboardCommand cmd, bool ret){
     }
 }
 
+void MainWindow::onStatusUpdate(ZString status){
+    ui->statusBar->showMessage(toQStr(status));
+}
+
+void MainWindow::onProgressUpdate(int val, int max){
+    ui->progressBar->setValue(val);
+    if(max != -1)
+        ui->progressBar->setMaximum(max);
+}
+
 // Rescan start/done
 
 void MainWindow::on_rescanButton_clicked(){
@@ -167,7 +165,8 @@ void MainWindow::onRescanDone(ZArray<KeyboardDevice> list){
 
         QStringList slist;
         for(auto it = list.begin(); it.more(); ++it){
-            slist.push_back(toQStr(it.get().name));
+            ZString kbname = it.get().name + " (" + it.get().version + ")";
+            slist.push_back(toQStr(kbname));
         }
         ui->keyboardSelect->addItems(slist);
         ui->keyboardSelect->setEnabled(true);
@@ -180,7 +179,7 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
     // Change selected keyboard
     if(index >= 0){
         ui->keyboardName->setText(toQStr("Keyboard: " + klist[index].name));
-        ui->firmwareVersion->setText(toQStr("Firmware: " + klist[index].version));
+        ui->firmwareVersion->setText(toQStr("Firmware: " + klist[index].fw_str));
         if(klist[index].flags & FLAG_SUPPORTED){
             ui->supported->setText("This keyboard is supported");
             ui->supported->setStyleSheet("QLabel { color: green; }");

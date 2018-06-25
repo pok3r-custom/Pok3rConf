@@ -21,12 +21,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(bool devel, QWidget *parent = 0);
     ~MainWindow();
-    void connectWorker(MainWorker *worker);
     Q_INVOKABLE void customizeKey(int index);
-
-protected:
-    // QWidget interface
-    void resizeEvent(QResizeEvent *event);
 
 private:
     void startCommand(KeyboardCommand cmd, QVariant arg1 = QVariant(), QVariant arg2 = QVariant());
@@ -41,6 +36,8 @@ signals:
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
     void onCommandDone(KeyboardCommand cmd, bool ret);
+    void onStatusUpdate(ZString status);
+    void onProgressUpdate(int val, int max);
 
 private slots:
     void on_rescanButton_clicked();
