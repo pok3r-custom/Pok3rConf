@@ -152,19 +152,19 @@ void MainWindow::on_rescanButton_clicked(){
 }
 
 void MainWindow::onRescanDone(ZArray<KeyboardDevice> list){
-    scanning = false;
     klist = list;
+    scanning = false;
     ui->rescanButton->setEnabled(true);
     ui->progressBar->setValue(100);
     ui->progressBar->setMaximum(100);
-    if(list.size()){
+    if(klist.size()){
         ui->statusBar->showMessage("Scan Done");
         ui->tabWidget->removeTab(TAB_NO_KB);
         for(int i = 0; i < ui->tabWidget->count(); ++i)
             ui->tabWidget->setTabEnabled(i, true);
 
         QStringList slist;
-        for(auto it = list.begin(); it.more(); ++it){
+        for(auto it = klist.begin(); it.more(); ++it){
             ZString kbname = it.get().name + " (" + it.get().version + ")";
             slist.push_back(toQStr(kbname));
         }
@@ -183,10 +183,20 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
         if(klist[index].flags & FLAG_SUPPORTED){
             ui->supported->setText("This keyboard is supported");
             ui->supported->setStyleSheet("QLabel { color: green; }");
-            ui->flashButton->setEnabled(true);
         } else {
             ui->supported->setText("Keyboard is not yet supported");
             ui->supported->setStyleSheet("QLabel { color: red; }");
+        }
+        ui->firmwareSelect->clear();
+        if(klist[index].updates.size()){
+            ui->firmwareSelect->setEnabled(true);
+            for(zsize i = 0; i < klist[index].updates.size(); ++i){
+                ui->firmwareSelect->addItem(toQStr(klist[index].updates[i]));
+            }
+            ui->flashButton->setEnabled(true);
+        } else {
+            ui->firmwareSelect->setEnabled(false);
+            ui->firmwareSelect->addItem("No Firmware Available");
             ui->flashButton->setEnabled(false);
         }
         if(klist[index].keymap.get()){
@@ -197,6 +207,12 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
             ui->tabWidget->setTabEnabled(TAB_KEYMAP-1, false);
         }
     }
+}
+
+void MainWindow::on_flashButton_clicked(){
+    int kbi = ui->keyboardSelect->currentIndex();
+    int fwi = ui->firmwareSelect->currentIndex();
+    LOG("Flash: " << klist[kbi].updates[fwi] << " -> " << klist[kbi].slug);
 }
 
 void MainWindow::on_browseButton_clicked(){

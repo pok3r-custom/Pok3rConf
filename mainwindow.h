@@ -42,6 +42,7 @@ public slots:
 private slots:
     void on_rescanButton_clicked();
     void on_keyboardSelect_currentIndexChanged(int index);
+    void on_flashButton_clicked();
     void on_browseButton_clicked();
     void on_uploadButton_clicked();
     void on_rebootButton_clicked();

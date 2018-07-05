@@ -66,7 +66,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="noTab">
        <attribute name="title">
@@ -195,11 +195,18 @@ p, li { white-space: pre-wrap; }
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="flashButton">
-          <property name="text">
-           <string>Flash qmk-pok3r</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QComboBox" name="firmwareSelect"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="flashButton">
+            <property name="text">
+             <string>Update Firmware</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer_4">
