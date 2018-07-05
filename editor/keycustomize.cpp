@@ -29,12 +29,18 @@ KeyCustomize::KeyCustomize(QWidget *parent) :
         row.push_back(new QStandardItem(toQStr(it.get().desc)));
         model->appendRow(row);
     }
+
+    connect(ui->tableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(accept()));
 }
 
 KeyCustomize::~KeyCustomize(){
     delete proxy;
     delete model;
     delete ui;
+}
+
+void KeyCustomize::showEvent(QShowEvent *){
+    ui->searchKey->setFocus(Qt::OtherFocusReason);
 }
 
 void KeyCustomize::accept(){

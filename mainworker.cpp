@@ -47,8 +47,8 @@ void MainWorker::onStartup(){
     // check for latest firmware
     emit statusUpdate("Checking for Firmware Update");
     emit progressUpdate(0, 0);
-    //downloadFile(FW_FETCH_URL FW_SUMS_FILE FW_FETCH_SUFFIX, FW_SUMS_FILE);
-    downloadFile(FW_TAGS_URL, "tags");
+    downloadFile(FW_FETCH_URL FW_SUMS_FILE FW_FETCH_SUFFIX, FW_SUMS_FILE);
+    //downloadFile(FW_TAGS_URL, "tags");
 }
 
 void MainWorker::downloadFile(ZString url, ZString fname){
@@ -95,6 +95,8 @@ void MainWorker::downloadFinished(){
 
     DLOG("HTTP OK " << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() <<
         " " << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString().toStdString());
+
+    // Handle redirections
     QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     if(!redirect.isNull()){
         QUrl url = redirect.toUrl();
@@ -107,58 +109,90 @@ void MainWorker::downloadFinished(){
     }
 
     ZPath path = dlfile.path();
-    LOG("Done " << path);
-    ZString ext = path.getExtension();
-    if(ext == ".md5"){
+    LOG("Downloaded " << path);
+    if(path.last() == FW_SUMS_FILE){
+        // Sums file
         dlfile.close();
         delete dl_hash;
         ZString sums = ZFile::readString(path);
         ArZ lines = sums.strExplode("\n");
+        // Fetch files listed with sums
         for(auto it = lines.begin(); it.more(); ++it){
             ArZ sp = it.get().strip('\r').explode(' ');
-            zassert(sp.size() == 2);
-            //LOG(sp[1] << " = " << sp[0]);
+            if(sp.size() != 2){
+                ELOG("Invalid sums line");
+                continue;
+            }
+
             KeyboardFirmware fw;
             fw.file = sp[1];
             fw.md5 = ZBinary::fromHex(sp[0]);
-            fw.ok = false;
+            fw.dl_ok = false;
+            fw.fw_ok = false;
+
+            ZFile file;
+            if(file.open(app_dir + fw.file)){
+                LOG("Cached " << fw.file);
+                ZBinary buf;
+                ZHash<ZBinary, ZHashBase::MD5> fhash;
+                while(file.read(buf, 1024)){
+                    fhash.feed(buf);
+                }
+                fhash.finish();
+                if(fhash.hash() == fw.md5){
+                    fw.dl_ok = true;
+                    checkFirmwareFile(&file, &fw);
+                }
+            }
             kb_fw.push(fw);
         }
         fw_i = 0;
         emit progressUpdate(fw_i, kb_fw.size());
 
-    } else if(ext == ".bin"){
+    } else if(path.getExtension() == ".bin"){
+        // Firmware file
         dl_hash->finish();
         ZBinary md5 = dl_hash->hash();
         delete dl_hash;
         if(md5 != kb_fw[fw_i].md5){
             ELOG("Invalid firmware " << md5 << " " << kb_fw[fw_i].md5);
         } else {
-            ZBinary info_bin;
-            if( (dlfile.seek(FW_INFO_OFFSET) != FW_INFO_OFFSET) ||
-                    (dlfile.read(info_bin, FW_INFO_SIZE) != FW_INFO_SIZE)){
-                ELOG("File read error");
-            }
+            checkFirmwareFile(&dlfile, &(kb_fw[fw_i]));
             dlfile.close();
-            ZString info_str(info_bin.raw(), info_bin.size());
-            ArZ info = info_str.explode(';');
-            if(info.size() == 4){
-                kb_fw[fw_i].ok = true;
-                kb_fw[fw_i].slug = info[1];
-                kb_fw[fw_i].version = info[2];
-            } else {
-                ELOG("Invalid firmware info");
-            }
         }
         emit progressUpdate(++fw_i, -1);
     }
 
-    if(fw_i < kb_fw.size()){
-        emit statusUpdate("Downloading " + kb_fw[fw_i].file);
-        downloadFile(FW_FETCH_URL + kb_fw[fw_i].file + FW_FETCH_SUFFIX, kb_fw[fw_i].file);
-    } else {
+    bool done = true;
+    for(int i = fw_i; i < kb_fw.size(); ++i){
+        if(!kb_fw[i].dl_ok){
+            emit statusUpdate("Downloading " + kb_fw[fw_i].file);
+            downloadFile(FW_FETCH_URL + kb_fw[fw_i].file + FW_FETCH_SUFFIX, kb_fw[fw_i].file);
+            done = false;
+            break;
+        }
+    }
+    if(done){
         emit statusUpdate("Fetched Firmware");
         emit checkedForUpdate();
+    }
+}
+
+void MainWorker::checkFirmwareFile(ZFile *file, KeyboardFirmware *fw){
+    ZBinary info_bin;
+    if( (file->seek(FW_INFO_OFFSET) != FW_INFO_OFFSET) || (file->read(info_bin, FW_INFO_SIZE) != FW_INFO_SIZE)){
+        ELOG("File read error");
+    }
+    ZString info_str(info_bin.raw(), info_bin.size());
+    ArZ info = info_str.explode(';');
+    if(info.size() == 4){
+        fw->fw_ok = true;
+        fw->name = info[0];
+        fw->slug = info[1];
+        fw->version = info[2];
+        DLOG("Firmware OK: " << fw->file << " " << fw->slug << " " << fw->version);
+    } else {
+        ELOG("Invalid firmware info");
     }
 }
 
@@ -202,39 +236,43 @@ void MainWorker::onDoRescan(){
             flags |= known_devices[dev.devtype];
         }
 
-        for(auto it = kb_fw.cbegin(); it.more(); ++it){
-            if(it.get().ok && it.get().slug == dev.info.slug){
-                if(it.get().version != version){
-                    LOG("Firmware Update " << version << " -> " << it.get().version << " for " << dev.info.slug);
-                }
-            }
-        }
-
         zu64 key = random.genzu();
         kdevs.add(key, dev);
 
         KeyboardDevice kbdev;
-        kbdev.devtype = dev.devtype,
-        kbdev.name = dev.info.name,
-        kbdev.slug = dev.info.slug,
-        kbdev.version = ver_str,
+        kbdev.devtype = dev.devtype;
+        kbdev.name = dev.info.name;
+        kbdev.slug = dev.info.slug;
+        kbdev.version = ver_str;
         kbdev.fw_str = fw_str;
-        kbdev.key = key,
-        kbdev.flags = flags,
-        kbdev.keymap = km,
+        kbdev.key = key;
+        kbdev.flags = flags;
+        kbdev.keymap = km;
+
+        for(auto it = kb_fw.cbegin(); it.more(); ++it){
+            if(it.get().fw_ok && it.get().slug == dev.info.slug){
+                if(it.get().version != version){
+                    //LOG("Firmware Update " << version << " -> " << it.get().version << " for " << dev.info.slug);
+                    kbdev.updates.push(it.get().name + " " + it.get().version);
+                    kbdev.update_files.push(it.get().file);
+                    break;
+                }
+            }
+        }
+
         list.push(kbdev);
     }
 
     if(fake){
         KeyboardDevice kbdev;
-        kbdev.devtype = DEV_POK3R,
-        kbdev.name = "Fake Pok3r",
-        kbdev.slug = "vortex/pok3r",
-        kbdev.version = "N/A",
+        kbdev.devtype = DEV_POK3R;
+        kbdev.name = "Fake Pok3r";
+        kbdev.slug = "vortex/pok3r";
+        kbdev.version = "N/A";
         kbdev.fw_str = "Fake Firmware v0.0";
-        kbdev.key = 0,
-        kbdev.flags = FLAG_NONE,
-        kbdev.keymap = nullptr,
+        kbdev.key = 0;
+        kbdev.flags = FLAG_NONE;
+        kbdev.keymap = nullptr;
         list.push(kbdev);
     }
 
@@ -248,6 +286,9 @@ void MainWorker::onDoRescan(){
             (flags.size() ? " (" + ZString::join(flags, ",") + ")" : "") <<
             " {" << dev.slug << "}" <<
             " [" << dev.key << "]");
+        for(zsize i = 0; i < dev.updates.size(); ++i){
+            LOG("  Firmware: " << dev.updates[i] << " - " << dev.update_files[i]);
+        }
     }
 
     LOG("<< Rescan Done");

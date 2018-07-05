@@ -17,6 +17,9 @@ public:
     ~KeyCustomize();
     void setKey(int k){ currentKey = k; }
 
+protected:
+    void showEvent(QShowEvent *) override;
+
 signals:
     void acceptedKey(int index, QString str);
 

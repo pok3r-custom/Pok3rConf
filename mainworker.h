@@ -42,12 +42,16 @@ struct KeyboardDevice {
     zu64 key;
     int flags;
     ZPointer<Keymap> keymap;
+    ZArray<ZString> updates;
+    ZArray<ZString> update_files;
 };
 
 struct KeyboardFirmware {
     ZString file;
     ZBinary md5;
-    bool ok;
+    bool dl_ok;
+    bool fw_ok;
+    ZString name;
     ZString slug;
     ZString version;
 };
@@ -60,6 +64,7 @@ public:
 private:
     void downloadFile(ZString url, ZString name);
     void startDownload(QUrl url);
+    void checkFirmwareFile(ZFile *file, KeyboardFirmware *fw);
 
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
