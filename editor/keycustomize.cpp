@@ -39,6 +39,11 @@ KeyCustomize::~KeyCustomize(){
     delete ui;
 }
 
+void KeyCustomize::setKey(int k, QString name){
+    currentKey = k;
+    ui->keycodeLabel->setText("Current Keycode: " + name);
+}
+
 void KeyCustomize::showEvent(QShowEvent *){
     ui->searchKey->setFocus(Qt::OtherFocusReason);
 }

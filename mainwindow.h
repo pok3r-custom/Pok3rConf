@@ -36,6 +36,7 @@ signals:
 public slots:
     void onRescanDone(ZArray<KeyboardDevice> list);
     void onCommandDone(KeyboardCommand cmd, bool ret);
+    void onKeymapUpdate(zu64 key, ZPointer<Keymap> keymap);
     void onStatusUpdate(ZString status);
     void onProgressUpdate(int val, int max);
 
@@ -59,6 +60,7 @@ private:
     KeyCustomize *keyCustomize;
     bool scanning;
     ZArray<KeyboardDevice> klist;
+    ZMap<zu16, KeyboardDevice*> kmap;
     KeyboardCommand currcmd;
     QSettings settings;
     int currentLayer;

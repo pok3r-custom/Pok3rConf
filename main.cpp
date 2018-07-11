@@ -66,6 +66,7 @@ int main(int argc, char *argv[]){
     QObject::connect(&window, SIGNAL(kbCommand(zu64,KeyboardCommand,QVariant,QVariant)), &worker, SLOT(onKbCommand(zu64,KeyboardCommand,QVariant,QVariant)));
     QObject::connect(&window, SIGNAL(kbKmUpdate(zu64,ZPointer<Keymap>)), &worker, SLOT(onKbKmUpdate(zu64,ZPointer<Keymap>)));
     QObject::connect(&worker, SIGNAL(commandDone(KeyboardCommand,bool)), &window, SLOT(onCommandDone(KeyboardCommand,bool)));
+    QObject::connect(&worker, SIGNAL(keymapUpdate(zu64,ZPointer<Keymap>)), &window, SLOT(onKeymapUpdate(zu64,ZPointer<Keymap>)));
     QObject::connect(&worker, SIGNAL(statusUpdate(ZString)), &window, SLOT(onStatusUpdate(ZString)));
     QObject::connect(&worker, SIGNAL(progressUpdate(int,int)), &window, SLOT(onProgressUpdate(int,int)));
     QObject::connect(&worker, SIGNAL(checkedForUpdate()), &window, SLOT(on_rescanButton_clicked()));

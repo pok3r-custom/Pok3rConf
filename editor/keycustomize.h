@@ -15,7 +15,7 @@ class KeyCustomize : public QDialog {
 public:
     explicit KeyCustomize(QWidget *parent = 0);
     ~KeyCustomize();
-    void setKey(int k){ currentKey = k; }
+    void setKey(int k, QString name);
 
 protected:
     void showEvent(QShowEvent *) override;

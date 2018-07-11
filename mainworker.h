@@ -27,10 +27,16 @@ enum KeyboardCommand {
     CMD_ERROR,
     CMD_REBOOT,
     CMD_BOOTLOADER,
-    CMD_KM_SET,
+    CMD_KM_SET,     //! Set keymap.
     CMD_KM_COMMIT,  //! Commit keymap to flash.
     CMD_KM_RELOAD,  //! Reset to keymap stored in flash.
     CMD_KM_RESET,   //! Reset to hardcoded default keymap.
+    CMD_FLASH,      //! Flash firmware to keyboard.
+};
+
+struct FirmwareDesc {
+    ZString name;
+    ZString file;
 };
 
 struct KeyboardDevice {
@@ -42,8 +48,7 @@ struct KeyboardDevice {
     zu64 key;
     int flags;
     ZPointer<Keymap> keymap;
-    ZArray<ZString> updates;
-    ZArray<ZString> update_files;
+    ZArray<FirmwareDesc> updates;
 };
 
 struct KeyboardFirmware {
@@ -69,6 +74,7 @@ private:
 signals:
     void rescanDone(ZArray<KeyboardDevice> list);
     void commandDone(KeyboardCommand cmd, bool ret);
+    void keymapUpdate(zu64 key, ZPointer<Keymap> keymap);
     void statusUpdate(ZString status);
     void progressUpdate(int val, int max);
     void checkedForUpdate();
@@ -78,6 +84,7 @@ public slots:
     void onDoRescan();
     void onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVariant arg2);
     void onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap);
+    void onRefreshKeymap(zu64 key);
 
 private slots:
     void downloadFinished();

@@ -121,6 +121,14 @@ void MainWindow::onCommandDone(KeyboardCommand cmd, bool ret){
     }
 }
 
+void MainWindow::onKeymapUpdate(zu64 key, ZPointer<Keymap> keymap){
+    if(kmap.contains(key)){
+        LOG("Update Keymap " << kmap[key]->slug);
+        kmap[key]->keymap = keymap;
+        updateKeyLayout(kmap[key]->keymap);
+    }
+}
+
 void MainWindow::onStatusUpdate(ZString status){
     ui->statusBar->showMessage(toQStr(status));
 }
@@ -165,6 +173,8 @@ void MainWindow::onRescanDone(ZArray<KeyboardDevice> list){
 
         QStringList slist;
         for(auto it = klist.begin(); it.more(); ++it){
+            kmap[it.get().key] = &it.get();
+
             ZString kbname = it.get().name + " (" + it.get().version + ")";
             slist.push_back(toQStr(kbname));
         }
@@ -180,28 +190,31 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
     if(index >= 0){
         ui->keyboardName->setText(toQStr("Keyboard: " + klist[index].name));
         ui->firmwareVersion->setText(toQStr("Firmware: " + klist[index].fw_str));
-        if(klist[index].flags & FLAG_SUPPORTED){
-            ui->supported->setText("This keyboard is supported");
-            ui->supported->setStyleSheet("QLabel { color: green; }");
-        } else {
-            ui->supported->setText("Keyboard is not yet supported");
-            ui->supported->setStyleSheet("QLabel { color: red; }");
-        }
+
+        // Add available firmware to list
         ui->firmwareSelect->clear();
         if(klist[index].updates.size()){
+            ui->supported->setText("This keyboard is supported");
+            ui->supported->setStyleSheet("QLabel { color: green; }");
+
             ui->firmwareSelect->setEnabled(true);
             for(zsize i = 0; i < klist[index].updates.size(); ++i){
-                ui->firmwareSelect->addItem(toQStr(klist[index].updates[i]));
+                ui->firmwareSelect->addItem(toQStr(klist[index].updates[i].name));
             }
             ui->flashButton->setEnabled(true);
         } else {
+            ui->supported->setText("Keyboard is not yet supported");
+            ui->supported->setStyleSheet("QLabel { color: red; }");
+
             ui->firmwareSelect->setEnabled(false);
             ui->firmwareSelect->addItem("No Firmware Available");
             ui->flashButton->setEnabled(false);
         }
+
+        // Update keymap for keyboard
         if(klist[index].keymap.get()){
             ui->tabWidget->setTabEnabled(TAB_KEYMAP-1, true);
-            LOG("Layout: " << klist[index].keymap->layoutName());
+            //LOG("Layout: " << klist[index].keymap->layoutName());
             updateKeyLayout(klist[index].keymap);
         } else {
             ui->tabWidget->setTabEnabled(TAB_KEYMAP-1, false);
@@ -212,7 +225,8 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
 void MainWindow::on_flashButton_clicked(){
     int kbi = ui->keyboardSelect->currentIndex();
     int fwi = ui->firmwareSelect->currentIndex();
-    LOG("Flash: " << klist[kbi].updates[fwi] << " -> " << klist[kbi].slug);
+    //LOG("Flash: " << klist[kbi].updates[fwi].name << " -> " << klist[kbi].slug);
+    startCommand(CMD_FLASH, toQStr(klist[kbi].updates[fwi].file));
 }
 
 void MainWindow::on_browseButton_clicked(){
@@ -259,7 +273,7 @@ void MainWindow::on_layerSelection_currentIndexChanged(int index){
 }
 
 void MainWindow::customizeKey(int index){
-    keyCustomize->setKey(index);
+    keyCustomize->setKey(index, toQStr(currentkeymap->keycodeName(currentkeymap->get(currentLayer, index))));
     keyCustomize->show();
     //keyCustomize->accepted();
 }

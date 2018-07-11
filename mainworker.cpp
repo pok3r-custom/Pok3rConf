@@ -19,8 +19,8 @@
 #include "zrandom.h"
 #include "zpath.h"
 
-//#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/raw/"
-#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/releases/raw/"
+#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/raw/"
+//#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/releases/raw/"
 #define FW_FETCH_SUFFIX "?job=qmk_pok3r"
 #define FW_SUMS_FILE    "qmk_pok3r.md5"
 
@@ -253,8 +253,10 @@ void MainWorker::onDoRescan(){
             if(it.get().fw_ok && it.get().slug == dev.info.slug){
                 if(it.get().version != version){
                     //LOG("Firmware Update " << version << " -> " << it.get().version << " for " << dev.info.slug);
-                    kbdev.updates.push(it.get().name + " " + it.get().version);
-                    kbdev.update_files.push(it.get().file);
+                    kbdev.updates.push({
+                        it.get().name + " " + it.get().version,
+                        it.get().file
+                    });
                     break;
                 }
             }
@@ -282,12 +284,11 @@ void MainWorker::onDoRescan(){
         if(dev.flags & FLAG_BOOTLOADER) flags.push("BOOT");
         if(dev.flags & FLAG_QMK) flags.push("QMK");
         if(dev.flags & FLAG_SUPPORTED) flags.push("SUPPORT");
-        LOG(dev.name << ": " << dev.version <<
-            (flags.size() ? " (" + ZString::join(flags, ",") + ")" : "") <<
-            " {" << dev.slug << "}" <<
+        LOG(dev.name << " (" << dev.slug << "): " << dev.version <<
+            (flags.size() ? " {" + ZString::join(flags, ",") + "}" : "") <<
             " [" << dev.key << "]");
         for(zsize i = 0; i < dev.updates.size(); ++i){
-            LOG("  Firmware: " << dev.updates[i] << " - " << dev.update_files[i]);
+            LOG("  Firmware: " << dev.updates[i].name << " - " << dev.updates[i].file);
         }
     }
 
@@ -323,13 +324,19 @@ void MainWorker::onKbCommand(zu64 key, KeyboardCommand cmd, QVariant arg1, QVari
             zassert(dev.iface->isQMK(), "kb not qmk");
             ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
             ret = qmk->reloadKeymap();
+            onRefreshKeymap(key);
             break;
         }
         case CMD_KM_RESET: {
             zassert(dev.iface->isQMK(), "kb not qmk");
             ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
             ret = qmk->resetKeymap();
+            onRefreshKeymap(key);
             break;
+        }
+
+        case CMD_FLASH: {
+
         }
         default:
             break;
@@ -350,4 +357,14 @@ void MainWorker::onKbKmUpdate(zu64 key, ZPointer<Keymap> keymap){
     ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
     bool ret = qmk->uploadKeymap(keymap);
     emit commandDone(CMD_KM_SET, ret);
+}
+
+void MainWorker::onRefreshKeymap(zu64 key){
+    if(kdevs.contains(key)){
+        auto dev = kdevs[key];
+        zassert(dev.iface->isQMK(), "kb not qmk");
+        ProtoQMK *qmk = dynamic_cast<ProtoQMK*>(dev.iface.get());
+        auto km = qmk->loadKeymap();
+        emit keymapUpdate(key, km);
+    }
 }
