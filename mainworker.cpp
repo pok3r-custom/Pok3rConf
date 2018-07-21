@@ -19,8 +19,8 @@
 #include "zrandom.h"
 #include "zpath.h"
 
-#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/raw/"
-//#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/releases/raw/"
+//#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/master/raw/"
+#define FW_FETCH_URL    "https://gitlab.com/pok3r-custom/qmk_pok3r/-/jobs/artifacts/releases/raw/"
 #define FW_FETCH_SUFFIX "?job=qmk_pok3r"
 #define FW_SUMS_FILE    "qmk_pok3r.md5"
 

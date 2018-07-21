@@ -194,7 +194,7 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
         // Add available firmware to list
         ui->firmwareSelect->clear();
         if(klist[index].updates.size()){
-            ui->supported->setText("This keyboard is supported");
+            ui->supported->setText("Firmware update available");
             ui->supported->setStyleSheet("QLabel { color: green; }");
 
             ui->firmwareSelect->setEnabled(true);
@@ -203,7 +203,7 @@ void MainWindow::on_keyboardSelect_currentIndexChanged(int index){
             }
             ui->flashButton->setEnabled(true);
         } else {
-            ui->supported->setText("Keyboard is not yet supported");
+            ui->supported->setText("No firmware available");
             ui->supported->setStyleSheet("QLabel { color: red; }");
 
             ui->firmwareSelect->setEnabled(false);

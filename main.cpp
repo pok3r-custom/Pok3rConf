@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QThreadPool>
+#include <QStandardPaths>
 
 #include "zoptions.h"
 #include "zlog.h"
@@ -24,7 +25,11 @@ const ZArray<ZOptions::OptDef> optdef = {
 #define TERM_PURPLE "\x1b[35m"
 
 int main(int argc, char *argv[]){
-    ZPath lgf = ZPath("logs") + ZLog::genLogFileName("pok3rconf_");
+    QApplication::setOrganizationName("pok3r-custom");
+    QApplication::setApplicationName("pok3rconf");
+    QApplication::setApplicationVersion("0.1");
+
+    ZPath lgf = ZPath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString()) + "logs" + ZLog::genLogFileName("pok3rconf_");
     ZLog::logLevelFile(ZLog::INFO, lgf, "[%time%] N %log%");
     ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
     ZLog::logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
@@ -41,13 +46,7 @@ int main(int argc, char *argv[]){
         ZLog::logLevelStdOut(ZLog::DEBUG, TERM_PURPLE "[%clock%] D %log%" TERM_RESET);
     }
 
-    LOG("Starting pok3rconf");
-
     QApplication app(argc, argv);
-
-    QApplication::setOrganizationName("pok3r-custom");
-    QApplication::setApplicationName("pok3rconf");
-    QApplication::setApplicationVersion("0.1");
 
     MainWindow window(options.getOpts().contains(OPT_DEVEL));
     MainWorker worker(options.getOpts().contains(OPT_FAKE));
