@@ -30,9 +30,9 @@ int main(int argc, char *argv[]){
     QApplication::setApplicationVersion("0.1");
 
     ZPath lgf = ZPath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString()) + "logs" + ZLog::genLogFileName("pok3rconf_");
-    ZLog::logLevelFile(ZLog::INFO, lgf, "[%time%] N %log%");
-    ZLog::logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
-    ZLog::logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
+    ZLog::defaultWorker()->logLevelFile(ZLog::INFO, lgf, "[%time%] N %log%");
+    ZLog::defaultWorker()->logLevelFile(ZLog::DEBUG, lgf, "[%time%] %thread% D [%function%|%file%:%line%] %log%");
+    ZLog::defaultWorker()->logLevelFile(ZLog::ERRORS, lgf, "[%time%] %thread% E [%function%|%file%:%line%] %log%");
 
     DLOG("Pok3rConf: " _POK3RCONF_DESCRIBE);
 
@@ -40,10 +40,10 @@ int main(int argc, char *argv[]){
     if(!options.parse(argc, argv))
         return -2;
 
-    ZLog::logLevelStdOut(ZLog::INFO, "[%clock%] N %log%");
-    ZLog::logLevelStdErr(ZLog::ERRORS, TERM_RED "[%clock%] E %log%" TERM_RESET);
+    ZLog::defaultWorker()->logLevelStdOut(ZLog::INFO, "[%clock%] N %log%");
+    ZLog::defaultWorker()->logLevelStdErr(ZLog::ERRORS, TERM_RED "[%clock%] E %log%" TERM_RESET);
     if(options.getOpts().contains(OPT_VERBOSE)){
-        ZLog::logLevelStdOut(ZLog::DEBUG, TERM_PURPLE "[%clock%] D %log%" TERM_RESET);
+        ZLog::defaultWorker()->logLevelStdOut(ZLog::DEBUG, TERM_PURPLE "[%clock%] D %log%" TERM_RESET);
     }
 
     QApplication app(argc, argv);
