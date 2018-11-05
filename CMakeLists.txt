@@ -47,7 +47,7 @@ else()
 endif()
 set_property(TARGET pok3rconf PROPERTY CXX_STANDARD 11)
 #qt5_use_modules(pok3rconf Quick Core)
-target_link_libraries(pok3rconf chaos pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
+target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
 
 # install
 install(TARGETS pok3rconf DESTINATION bin)
