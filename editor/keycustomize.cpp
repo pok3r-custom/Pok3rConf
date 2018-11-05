@@ -40,8 +40,8 @@ void KeyCustomize::accept(){
     if(select->hasSelection()){
         QModelIndexList list = select->selectedRows();
         if(list.size() == 1){
-            QModelIndex idx = list.at(0);
-            LOG("Selected: " << model->item(idx.row())->text().toStdString());
+            QModelIndex idx = proxy->mapToSource(list.at(0));
+            LOG("Selected: " << idx.row() << " " << model->item(idx.row())->text().toStdString());
             QDialog::accept();
             ui->searchKey->clear();
             ui->tableView->selectionModel()->clearSelection();
