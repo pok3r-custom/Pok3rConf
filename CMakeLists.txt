@@ -47,7 +47,7 @@ else()
 endif()
 set_property(TARGET pok3rconf PROPERTY CXX_STANDARD 11)
 #qt5_use_modules(pok3rconf Quick Core)
-target_link_libraries(pok3rconf chaos-shared pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
+target_link_libraries(pok3rconf pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
 
 # install
 install(TARGETS pok3rconf DESTINATION bin)
@@ -98,6 +98,8 @@ if(MINGW)
     set(MINGW_LIBGCC "${MINGW_LIBS_DIR}/libgcc_s_dw2-1.dll")
     set(MINGW_LIBSTD "${MINGW_LIBS_DIR}/libstdc++-6.dll")
     set(MINGW_LIBWPT "${MINGW_LIBS_DIR}/libwinpthread-1.dll")
+    set(MINGW_LIBEAY32 "${MINGW_DIR}/../opt/bin/libeay32.dll")
+    set(MINGW_SSLEAY32 "${MINGW_DIR}/../opt/bin/ssleay32.dll")
 
     add_custom_command(TARGET pok3rconf POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -108,6 +110,12 @@ if(MINGW)
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${MINGW_LIBWPT}"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${MINGW_LIBEAY32}"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${MINGW_SSLEAY32}"
             "$<TARGET_FILE_DIR:pok3rconf>"
     )
 endif()
