@@ -47,7 +47,10 @@ else()
 endif()
 set_property(TARGET pok3rconf PROPERTY CXX_STANDARD 11)
 #qt5_use_modules(pok3rconf Quick Core)
-target_link_libraries(pok3rconf pok3rlib Qt5::Widgets Qt5::Quick Qt5::Qml Qt5::QuickWidgets Qt5::Network)
+target_link_libraries(pok3rconf pok3rlib Qt5::Widgets Qt5::Qml Qt5::Quick Qt5::QuickWidgets Qt5::Network)
+
+get_target_property(OUT pok3rconf LINK_LIBRARIES)
+message(STATUS ${OUT})
 
 # install
 install(TARGETS pok3rconf DESTINATION bin)
@@ -77,10 +80,16 @@ if(WIN32)
             "$<TARGET_FILE:Qt5::Widgets>"
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:Qt5::Qml>"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::Quick>"
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE:Qt5::Qml>"
+            "$<TARGET_FILE_DIR:Qt5::Quick>/Qt5QuickControls2d.dll"
+            "$<TARGET_FILE_DIR:pok3rconf>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE_DIR:Qt5::Quick>/Qt5QuickTemplates2d.dll"
             "$<TARGET_FILE_DIR:pok3rconf>"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:Qt5::QuickWidgets>"
@@ -94,8 +103,8 @@ endif()
 if(MINGW)
     # Apparently Qt's mingw doesn't come with some static libraries
     get_filename_component(MINGW_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
-    set(MINGW_LIBS_DIR "${MINGW_DIR}/../i686-w64-mingw32/lib")
-    set(MINGW_LIBGCC "${MINGW_LIBS_DIR}/libgcc_s_dw2-1.dll")
+    set(MINGW_LIBS_DIR "${MINGW_DIR}/../x86_64-w64-mingw32/lib")
+    set(MINGW_LIBGCC "${MINGW_LIBS_DIR}/libgcc_s_seh-1.dll")
     set(MINGW_LIBSTD "${MINGW_LIBS_DIR}/libstdc++-6.dll")
     set(MINGW_LIBWPT "${MINGW_LIBS_DIR}/libwinpthread-1.dll")
     set(MINGW_LIBEAY32 "${MINGW_DIR}/../opt/bin/libeay32.dll")
